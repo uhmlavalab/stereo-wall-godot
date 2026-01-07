@@ -22,7 +22,7 @@ window/size/viewport_height=1080
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/stereo_wall/plugin.cfg")
+enabled=PackedStringArray("res://addons/stereo_wall_display/plugin.cfg")
 
 [input]
 
