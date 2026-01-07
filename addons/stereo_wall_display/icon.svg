@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Background -->
+  <rect x="2" y="2" width="60" height="60" rx="8" fill="#1a1a2e"/>
+  
+  <!-- Left eye panel -->
+  <rect x="6" y="16" width="24" height="32" rx="2" fill="#4fc3f7" opacity="0.9"/>
+  <rect x="8" y="18" width="20" height="28" rx="1" fill="#1a1a2e" opacity="0.3"/>
+  
+  <!-- Right eye panel -->
+  <rect x="34" y="16" width="24" height="32" rx="2" fill="#ef5350" opacity="0.9"/>
+  <rect x="36" y="18" width="20" height="28" rx="1" fill="#1a1a2e" opacity="0.3"/>
+  
+  <!-- Center divider -->
+  <line x1="32" y1="14" x2="32" y2="50" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Viewer indicator -->
+  <circle cx="32" cy="56" r="4" fill="#ffd54f"/>
+  <path d="M28 56 L32 48 L36 56" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linecap="round"/>
+</svg>
