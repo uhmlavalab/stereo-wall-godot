@@ -39,7 +39,6 @@ albedo_color = Color(0.2, 0.8, 0.4, 1)
 
 [node name="StereoWallDisplay" type="Node" parent="."]
 script = ExtResource("1_stereo")
-far_clip = 1000.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1")

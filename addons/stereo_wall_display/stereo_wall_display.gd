@@ -23,7 +23,7 @@ class_name StereoWallDisplay
 @export var start_rotation_y: float = 0.0  ## Initial yaw (degrees)
 @export var move_speed: float = 5.0        ## Movement speed (m/s)
 @export var look_sensitivity: float = 0.002  ## Mouse look sensitivity
-@export var controller_look_speed: float = 2.0  ## Controller right stick sensitivity
+@export var controller_look_speed: float = 0.05  ## Controller right stick sensitivity
 @export var controller_deadzone: float = 0.15   ## Stick deadzone
 
 @export_group("Render Settings")
