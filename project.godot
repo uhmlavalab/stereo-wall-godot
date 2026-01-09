@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Stereo Wall Display"
-run/main_scene="res://addons/stereo_wall_display/example_environment.tscn"
+run/main_scene="res://example_scene/example_scene.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 
 [display]

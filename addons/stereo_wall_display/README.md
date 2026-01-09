@@ -6,16 +6,17 @@ See the main README.md for full documentation.
 
 ## Quick Start
 
-1. Add `StereoWallDisplay` node to your scene
-2. Add your 3D content
+1. Add `StereoWallDisplay` as a child of your player's head/camera node
+2. Configure wall dimensions to match your display
 3. Set `edit_mode = false` for production
 
-## Controls
+## Scene Structure
 
-- WASD / Left Stick: Move
-- Mouse / Right Stick: Look
-- R: Reset position
-- ESC: Quit
+```
+Player (CharacterBody3D)
+└── Head (Node3D)
+    └── StereoWallDisplay
+```
 
 ## License
 
