@@ -1,23 +1,32 @@
 # Stereo Wall Display
 
-Godot 4.x addon for stereoscopic 3D rendering on large display walls.
-
-See the main README.md for full documentation.
+Godot 4.x addon for stereoscopic 3D rendering on large display walls with off-axis projection.
 
 ## Quick Start
 
-1. Add `StereoWallDisplay` as a child of your player's head/camera node
-2. Configure wall dimensions to match your display
-3. Set `edit_mode = false` for production
+1. Add `StereoWallDisplay` node to your scene
+2. Configure wall dimensions to match your physical display
+3. Use WASD/mouse to fly around in edit mode
+4. Set `edit_mode = false` for production stereo output
 
-## Scene Structure
+## Head Tracking
 
+Select tracking method from the inspector:
+
+- **None** — Static head at configurable height
+- **Vive Tracker** — SteamVR/OpenXR tracking (coming soon)
+- **VRPN** — VRPN server tracking (coming soon)
+
+## Tracking API
+
+```gdscript
+$StereoWallDisplay.set_head_position(Vector3(x, y, z))
 ```
-Player (CharacterBody3D)
-└── Head (Node3D)
-    └── StereoWallDisplay
-```
+
+## Documentation
+
+See the main [README.md](../../README.md) for full documentation.
 
 ## License
 
-MIT
+MIT License — Copyright (c) 2026 Laboratory for Advanced Visualizations and Applications (LAVA), University of Hawaii.

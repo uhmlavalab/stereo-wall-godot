@@ -1,3 +1,7 @@
+# Copyright (c) 2026 Laboratory for Advanced Visualizations and Applications (LAVA)
+# University of Hawaii. All rights reserved.
+# Licensed under the MIT License. See LICENSE file for details.
+
 @tool
 extends EditorPlugin
 

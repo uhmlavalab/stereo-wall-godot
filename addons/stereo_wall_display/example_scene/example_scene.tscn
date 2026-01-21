@@ -1,11 +1,6 @@
-[gd_scene load_steps=12 format=3 uid="uid://gt2e6enltqh"]
+[gd_scene load_steps=10 format=3 uid="uid://gt2e6enltqh"]
 
 [ext_resource type="Script" uid="uid://d2mxktnyjcc1a" path="res://addons/stereo_wall_display/stereo_wall_display.gd" id="1_stereo"]
-[ext_resource type="Script" uid="uid://ckevqxxbielg7" path="res://addons/stereo_wall_display/example_scene/player.gd" id="2_player"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
-radius = 0.3
-height = 1.8
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_horizon_color = Color(0.65, 0.65, 0.67, 1)
@@ -42,18 +37,9 @@ albedo_color = Color(0.2, 0.8, 0.4, 1)
 
 [node name="ExampleScene" type="Node3D"]
 
-[node name="Player" type="CharacterBody3D" parent="."]
-script = ExtResource("2_player")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("CapsuleShape3D_1")
-
-[node name="Head" type="Node3D" parent="Player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.64, 0)
-
-[node name="StereoWallDisplay" type="Node3D" parent="Player/Head"]
+[node name="StereoWallDisplay" type="Node3D" parent="."]
 script = ExtResource("1_stereo")
+static_head_height = 1.64
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1")
@@ -64,71 +50,71 @@ shadow_enabled = true
 directional_shadow_max_distance = 50.0
 
 [node name="Floor" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, -12.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, -12)
 use_collision = true
 size = Vector3(40, 0.2, 40)
 material = SubResource("mat_floor")
 
 [node name="BackWall" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 7.809)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -32)
 use_collision = true
 size = Vector3(40, 10, 0.3)
 material = SubResource("mat_wall")
 
 [node name="LeftWall" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 4, -12.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 4, -12)
 use_collision = true
 size = Vector3(0.3, 10, 40)
 material = SubResource("mat_wall")
 
 [node name="RightWall" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 4, -12.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 4, -12)
 use_collision = true
 size = Vector3(0.3, 10, 40)
 material = SubResource("mat_wall")
 
 [node name="RedCube" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -16.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -8)
 use_collision = true
 material = SubResource("mat_red")
 
 [node name="BlueCube" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.75, -14.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.75, -6)
 use_collision = true
 size = Vector3(1.5, 1.5, 1.5)
 material = SubResource("mat_blue")
 
 [node name="GreenCube" type="CSGBox3D" parent="."]
-transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 0, 0.4, -18.191)
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 0, 0.4, -10)
 use_collision = true
 size = Vector3(0.8, 0.8, 0.8)
 material = SubResource("mat_green")
 
 [node name="Pillar1" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, -10.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, -5)
 use_collision = true
 height = 3.0
 material = SubResource("mat_wall")
 
 [node name="Pillar2" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -10.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -5)
 use_collision = true
 height = 3.0
 material = SubResource("mat_wall")
 
 [node name="Sphere" type="CSGSphere3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.6, -12.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.6, -4)
 use_collision = true
 radius = 0.6
 
 [node name="Platform" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.5, -7.191)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.5, -3)
 use_collision = true
 size = Vector3(5, 1, 3)
 material = SubResource("mat_floor")
 
 [node name="Ramp" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 8, 0.25, -10.191)
+transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 8, 0.25, -6)
 use_collision = true
 size = Vector3(2, 0.2, 4)
 material = SubResource("mat_floor")
