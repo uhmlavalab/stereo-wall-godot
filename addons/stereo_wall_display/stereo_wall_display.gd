@@ -38,8 +38,6 @@ enum TrackingType {
 
 # Dynamic tracking properties (shown/hidden based on tracking_type)
 var static_head_height: float = 1.64
-var vive_tracker_serial: String = ""
-var vive_use_openxr: bool = true
 var vrpn_server_ip: String = "127.0.0.1"
 var vrpn_server_port: int = 3883
 var vrpn_tracker_name: String = "Tracker0"
@@ -71,7 +69,7 @@ var vrpn_sensor_index: int = 0
 ## Far clipping plane distance in meters.
 @export var far_clip: float = 5000.0
 
-@export_group("Wall Physical Settings (in Meters)")
+@export_group("Wall Physical Settings (in Meters)") 
 ## Physical width of the display wall.
 @export var wall_width: float = 6.047
 ## Physical height of the display wall.
@@ -122,17 +120,8 @@ func _get_property_list() -> Array[Dictionary]:
 			"usage": PROPERTY_USAGE_DEFAULT,
 		})
 	elif tracking_type == TrackingType.VIVE_TRACKER:
-		props.append({
-			"name": "vive_tracker_serial",
-			"type": TYPE_STRING,
-			"usage": PROPERTY_USAGE_DEFAULT,
-			"hint": PROPERTY_HINT_NONE,
-		})
-		props.append({
-			"name": "vive_use_openxr",
-			"type": TYPE_BOOL,
-			"usage": PROPERTY_USAGE_DEFAULT,
-		})
+		# Vive Tracker auto-detects first available tracker - no config needed
+		pass
 	elif tracking_type == TrackingType.VRPN:
 		props.append({
 			"name": "vrpn_server_ip",
@@ -161,8 +150,6 @@ func _get_property_list() -> Array[Dictionary]:
 func _set(property: StringName, value: Variant) -> bool:
 	match property:
 		"static_head_height": static_head_height = value
-		"vive_tracker_serial": vive_tracker_serial = value
-		"vive_use_openxr": vive_use_openxr = value
 		"vrpn_server_ip": vrpn_server_ip = value
 		"vrpn_server_port": vrpn_server_port = value
 		"vrpn_tracker_name": vrpn_tracker_name = value
@@ -174,8 +161,6 @@ func _set(property: StringName, value: Variant) -> bool:
 func _get(property: StringName) -> Variant:
 	match property:
 		"static_head_height": return static_head_height
-		"vive_tracker_serial": return vive_tracker_serial
-		"vive_use_openxr": return vive_use_openxr
 		"vrpn_server_ip": return vrpn_server_ip
 		"vrpn_server_port": return vrpn_server_port
 		"vrpn_tracker_name": return vrpn_tracker_name
@@ -205,8 +190,8 @@ func _initialize():
 		_setup_stereo_viewports()
 	_initialized = true
 	if enable_fly_controls:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		_mouse_captured = true
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_mouse_captured = true
 	_start_tracking()
 
 ## Destroys and recreates all runtime nodes. Called when edit_mode changes.
@@ -251,8 +236,7 @@ func _start_tracking():
 	match tracking_type:
 		TrackingType.VIVE_TRACKER:
 			_tracking_provider = ViveTrackerProvider.new()
-			_tracking_provider.tracker_serial = vive_tracker_serial
-			_tracking_provider.use_openxr = vive_use_openxr
+			# Auto-detects first available tracker, no config needed
 		TrackingType.VRPN:
 			_tracking_provider = VRPNProvider.new()
 			_tracking_provider.server_ip = vrpn_server_ip
@@ -261,7 +245,9 @@ func _start_tracking():
 			_tracking_provider.sensor_index = vrpn_sensor_index
 	
 	if _tracking_provider:
-		_tracking_provider.start()
+		if not _tracking_provider.start():
+			print("[StereoWallDisplay] Tracking failed to start, using static head position")
+			_tracking_provider = null
 
 ## Stops and cleans up the current tracking provider.
 func _stop_tracking():
@@ -269,10 +255,16 @@ func _stop_tracking():
 		_tracking_provider.stop()
 		_tracking_provider = null
 
-## Polls the tracking provider and updates the head position if tracking is active.
+## Polls the tracking provider and updates the head position. Falls back to static height if not tracking.
 func _poll_tracking():
-	if _tracking_provider and _tracking_provider.is_tracking():
-		_head_position = _tracking_provider.poll()
+	if _tracking_provider:
+		var tracked_pos = _tracking_provider.poll()
+		if _tracking_provider.is_tracking():
+			_head_position = tracked_pos
+		# If not tracking, keep last known position (or static if never tracked)
+	elif tracking_type != TrackingType.NONE:
+		# Tracking was requested but provider failed - use static fallback
+		_head_position = Vector3(0, static_head_height, 0)
 
 # Tracking API (for external use)
 
@@ -437,7 +429,7 @@ func _process(_delta):
 		if _edit_camera:
 			_edit_camera.position = _head_position
 		if not edit_mode and _initialized and _left_camera and _right_camera:
-			_update_stereo_cameras()
+		_update_stereo_cameras()
 
 ## Updates left and right stereo cameras with off-axis projection based on head position.
 func _update_stereo_cameras():
@@ -536,7 +528,7 @@ func _update_editor_gizmos():
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		eye_mesh.material_override = mat
 		_gizmo_holder.add_child(eye_mesh)
-	
+
 	# Frustum lines
 	_draw_frustum_lines(left_eye_pos, Color(0.3, 0.5, 1.0, 0.5))
 	_draw_frustum_lines(right_eye_pos, Color(1.0, 0.4, 0.3, 0.5))

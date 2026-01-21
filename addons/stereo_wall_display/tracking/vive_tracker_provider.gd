@@ -6,118 +6,128 @@ class_name ViveTrackerProvider
 extends TrackingProvider
 ## Vive Tracker provider using OpenXR/SteamVR.
 ##
-## Tracks a Vive Tracker attached to the user's head for CAVE-style displays.
+## Automatically detects and uses the first available Vive Tracker.
+## Falls back to static head position if no tracker is found.
 ## Requires SteamVR running and Godot OpenXR plugin enabled.
-##
-## @experimental This provider requires real hardware testing.
-
-## Serial number of the Vive Tracker (e.g., "LHR-12345678"). Leave empty for auto-detect.
-var tracker_serial: String = ""
-## Role assigned to the tracker in SteamVR.
-var tracker_role: String = "handheld_object"
-## Use OpenXR (recommended) instead of legacy OpenVR.
-var use_openxr: bool = true
 
 var _xr_interface: XRInterface
 var _tracker: XRPositionalTracker
+var _search_attempts: int = 0
+var _max_search_attempts: int = 60  # ~1 second at 60fps before giving up initial search
 
-## Initializes the XR interface and begins searching for the tracker.
+## Initializes OpenXR and begins searching for any available tracker.
 func start() -> bool:
-	print("[ViveTracker] Starting with serial: %s, role: %s" % [tracker_serial, tracker_role])
+	print("[ViveTracker] Starting - will auto-detect first available tracker")
 	
-	if use_openxr:
-		return _start_openxr()
-	else:
-		return _start_openvr()
-
-## Initializes tracking via OpenXR (recommended path).
-func _start_openxr() -> bool:
 	_xr_interface = XRServer.find_interface("OpenXR")
 	if not _xr_interface:
-		push_error("[ViveTracker] OpenXR interface not found. Enable OpenXR in Project Settings.")
+		push_warning("[ViveTracker] OpenXR interface not found - falling back to static head")
 		return false
 	
 	if not _xr_interface.is_initialized():
 		if not _xr_interface.initialize():
-			push_error("[ViveTracker] Failed to initialize OpenXR")
+			push_warning("[ViveTracker] Failed to initialize OpenXR - falling back to static head")
 			return false
 	
-	_find_tracker()
+	# Try to find a tracker immediately
+	_find_any_tracker()
 	
 	if _tracker:
 		_is_tracking = true
 		print("[ViveTracker] Found tracker: %s" % _tracker.name)
-		return true
 	else:
-		print("[ViveTracker] Tracker not found yet, will keep searching...")
-		XRServer.tracker_added.connect(_on_tracker_added)
-		return true
+		print("[ViveTracker] No tracker found yet, will keep searching...")
+		# Listen for new trackers being connected
+		if not XRServer.tracker_added.is_connected(_on_tracker_added):
+			XRServer.tracker_added.connect(_on_tracker_added)
+		if not XRServer.tracker_removed.is_connected(_on_tracker_removed):
+			XRServer.tracker_removed.connect(_on_tracker_removed)
+	
+	return true
 
-## Initializes tracking via legacy OpenVR (not implemented).
-func _start_openvr() -> bool:
-	push_warning("[ViveTracker] OpenVR legacy mode not implemented, use OpenXR")
-	return false
-
-## Searches for a matching tracker in the XR system.
-func _find_tracker():
-	for tracker_name in XRServer.get_trackers(XRServer.TRACKER_ANY):
+## Searches for any available Vive Tracker in the XR system.
+func _find_any_tracker():
+	var trackers = XRServer.get_trackers(XRServer.TRACKER_ANY)
+	
+	for tracker_name in trackers:
+		var tracker = XRServer.get_tracker(tracker_name)
+		if tracker and _is_vive_tracker(tracker):
+			_tracker = tracker
+			print("[ViveTracker] Auto-selected tracker: %s" % tracker.name)
+			return
+	
+	# If no Vive Tracker found, try any tracker that's not a controller or HMD
+	for tracker_name in trackers:
 		var tracker = XRServer.get_tracker(tracker_name)
 		if tracker:
-			if tracker_serial != "" and tracker_serial in tracker.name:
-				_tracker = tracker
-				return
-			if tracker.description == tracker_role:
-				_tracker = tracker
-				return
-	
-	if tracker_serial == "":
-		for tracker_name in XRServer.get_trackers(XRServer.TRACKER_ANY):
-			var tracker = XRServer.get_tracker(tracker_name)
-			if tracker and "vive_tracker" in tracker.name.to_lower():
-				_tracker = tracker
-				return
+			var name_lower = tracker.name.to_lower()
+			# Skip controllers and headsets
+			if "controller" in name_lower or "head" in name_lower or "hmd" in name_lower:
+				continue
+			_tracker = tracker
+			print("[ViveTracker] Using non-controller tracker: %s" % tracker.name)
+			return
+
+## Checks if a tracker appears to be a Vive Tracker based on its name.
+func _is_vive_tracker(tracker: XRPositionalTracker) -> bool:
+	var name_lower = tracker.name.to_lower()
+	return "vive" in name_lower and "tracker" in name_lower
 
 ## Called when a new tracker is detected by the XR system.
-func _on_tracker_added(tracker_name: StringName, type: int):
-	if _tracker:
-		return
+func _on_tracker_added(tracker_name: StringName, _type: int):
+	if _tracker and _is_tracking:
+		return  # Already have a working tracker
 	
 	var tracker = XRServer.get_tracker(tracker_name)
 	if not tracker:
 		return
 	
-	print("[ViveTracker] New tracker detected: %s" % tracker_name)
+	print("[ViveTracker] New device detected: %s" % tracker_name)
 	
-	if tracker_serial != "" and tracker_serial in str(tracker_name):
+	# Accept any Vive Tracker, or any non-controller device
+	var name_lower = str(tracker_name).to_lower()
+	if "tracker" in name_lower or ("vive" in name_lower and "controller" not in name_lower):
 		_tracker = tracker
-		_is_tracking = true
-		tracking_acquired.emit()
-		print("[ViveTracker] Matched tracker by serial: %s" % tracker_name)
-	elif tracker_serial == "" and "tracker" in str(tracker_name).to_lower():
-		_tracker = tracker
-		_is_tracking = true
-		tracking_acquired.emit()
-		print("[ViveTracker] Using tracker: %s" % tracker_name)
+		_is_tracking = false  # Will be set true when we get valid pose data
+		print("[ViveTracker] Now using: %s" % tracker_name)
+
+## Called when a tracker is removed/disconnected.
+func _on_tracker_removed(tracker_name: StringName, _type: int):
+	if _tracker and _tracker.name == tracker_name:
+		print("[ViveTracker] Tracker disconnected: %s" % tracker_name)
+		_tracker = null
+		_is_tracking = false
+		tracking_lost.emit()
+		# Try to find another tracker
+		_find_any_tracker()
 
 ## Stops tracking and disconnects signals.
 func stop():
 	if XRServer.tracker_added.is_connected(_on_tracker_added):
 		XRServer.tracker_added.disconnect(_on_tracker_added)
+	if XRServer.tracker_removed.is_connected(_on_tracker_removed):
+		XRServer.tracker_removed.disconnect(_on_tracker_removed)
 	_tracker = null
 	_is_tracking = false
+	_search_attempts = 0
 	print("[ViveTracker] Stopped")
 
-## Polls the tracker for the latest position.
+## Polls the tracker for the latest position. Returns last known position if tracking lost.
 func poll() -> Vector3:
+	# If no tracker, keep searching periodically
 	if not _tracker:
-		_find_tracker()
+		_search_attempts += 1
+		if _search_attempts % 60 == 0:  # Check every ~1 second
+			_find_any_tracker()
 		return _last_position
 	
+	# Get the tracker's pose
 	var pose = _tracker.get_pose("default")
 	if pose and pose.tracking_confidence > 0:
 		if not _is_tracking:
 			_is_tracking = true
 			tracking_acquired.emit()
+			print("[ViveTracker] Tracking acquired")
 		
 		_last_position = pose.transform.origin
 		tracking_updated.emit(_last_position)
@@ -125,10 +135,11 @@ func poll() -> Vector3:
 		if _is_tracking:
 			_is_tracking = false
 			tracking_lost.emit()
+			print("[ViveTracker] Tracking lost - using last known position")
 	
 	return _last_position
 
-## Returns true if the tracker is found and actively tracking.
+## Returns true if a tracker is found and actively providing pose data.
 func is_tracking() -> bool:
 	return _is_tracking and _tracker != null
 
@@ -139,6 +150,6 @@ func get_status() -> String:
 	elif not _tracker:
 		return "Searching for tracker..."
 	elif not _is_tracking:
-		return "Tracker found, no pose data"
+		return "Tracker found, waiting for pose..."
 	else:
-		return "Tracking"
+		return "Tracking: %s" % _tracker.name
