@@ -39,7 +39,8 @@ albedo_color = Color(0.2, 0.8, 0.4, 1)
 
 [node name="StereoWallDisplay" type="Node3D" parent="."]
 script = ExtResource("1_stereo")
-static_head_height = 1.64
+tracking_type = 1
+vive_tracker_role = 10
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1")

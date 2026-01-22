@@ -38,6 +38,7 @@ enum TrackingType {
 
 # Dynamic tracking properties (shown/hidden based on tracking_type)
 var static_head_height: float = 1.64
+var vive_tracker_role: int = 10  # Default to CHEST (index 10 in TrackerRole enum)
 var vrpn_server_ip: String = "127.0.0.1"
 var vrpn_server_port: int = 3883
 var vrpn_tracker_name: String = "Tracker0"
@@ -106,13 +107,6 @@ var _tracking_provider: TrackingProvider
 func _get_property_list() -> Array[Dictionary]:
 	var props: Array[Dictionary] = []
 	
-	props.append({
-		"name": "Head Tracking",
-		"type": TYPE_NIL,
-		"usage": PROPERTY_USAGE_GROUP,
-		"hint_string": ""
-	})
-	
 	if tracking_type == TrackingType.NONE:
 		props.append({
 			"name": "static_head_height",
@@ -120,8 +114,14 @@ func _get_property_list() -> Array[Dictionary]:
 			"usage": PROPERTY_USAGE_DEFAULT,
 		})
 	elif tracking_type == TrackingType.VIVE_TRACKER:
-		# Vive Tracker auto-detects first available tracker - no config needed
-		pass
+		# Dropdown to select tracker role (matches ViveTrackerProvider.TrackerRole enum)
+		props.append({
+			"name": "vive_tracker_role",
+			"type": TYPE_INT,
+			"usage": PROPERTY_USAGE_DEFAULT,
+			"hint": PROPERTY_HINT_ENUM,
+			"hint_string": "Any,Left Foot,Right Foot,Left Shoulder,Right Shoulder,Left Elbow,Right Elbow,Left Knee,Right Knee,Waist,Chest,Camera,Keyboard"
+		})
 	elif tracking_type == TrackingType.VRPN:
 		props.append({
 			"name": "vrpn_server_ip",
@@ -150,6 +150,7 @@ func _get_property_list() -> Array[Dictionary]:
 func _set(property: StringName, value: Variant) -> bool:
 	match property:
 		"static_head_height": static_head_height = value
+		"vive_tracker_role": vive_tracker_role = value
 		"vrpn_server_ip": vrpn_server_ip = value
 		"vrpn_server_port": vrpn_server_port = value
 		"vrpn_tracker_name": vrpn_tracker_name = value
@@ -161,6 +162,7 @@ func _set(property: StringName, value: Variant) -> bool:
 func _get(property: StringName) -> Variant:
 	match property:
 		"static_head_height": return static_head_height
+		"vive_tracker_role": return vive_tracker_role
 		"vrpn_server_ip": return vrpn_server_ip
 		"vrpn_server_port": return vrpn_server_port
 		"vrpn_tracker_name": return vrpn_tracker_name
@@ -190,8 +192,8 @@ func _initialize():
 		_setup_stereo_viewports()
 	_initialized = true
 	if enable_fly_controls:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	_mouse_captured = true
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		_mouse_captured = true
 	_start_tracking()
 
 ## Destroys and recreates all runtime nodes. Called when edit_mode changes.
@@ -236,7 +238,7 @@ func _start_tracking():
 	match tracking_type:
 		TrackingType.VIVE_TRACKER:
 			_tracking_provider = ViveTrackerProvider.new()
-			# Auto-detects first available tracker, no config needed
+			_tracking_provider.tracker_role = vive_tracker_role
 		TrackingType.VRPN:
 			_tracking_provider = VRPNProvider.new()
 			_tracking_provider.server_ip = vrpn_server_ip
@@ -429,7 +431,7 @@ func _process(_delta):
 		if _edit_camera:
 			_edit_camera.position = _head_position
 		if not edit_mode and _initialized and _left_camera and _right_camera:
-		_update_stereo_cameras()
+			_update_stereo_cameras()
 
 ## Updates left and right stereo cameras with off-axis projection based on head position.
 func _update_stereo_cameras():
@@ -545,6 +547,11 @@ func _draw_frustum_lines(eye_pos: Vector3, color: Color):
 func _create_line(from: Vector3, to: Vector3, color: Color) -> MeshInstance3D:
 	var mesh_instance = MeshInstance3D.new()
 	var immediate_mesh = ImmediateMesh.new()
+	
+	# Guard against zero-length lines which cause mesh errors
+	if from.is_equal_approx(to):
+		to = from + Vector3(0.001, 0, 0)
+	
 	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
 	immediate_mesh.surface_add_vertex(from)
 	immediate_mesh.surface_add_vertex(to)
