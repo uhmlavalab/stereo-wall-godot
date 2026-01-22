@@ -39,6 +39,7 @@ albedo_color = Color(0.2, 0.8, 0.4, 1)
 
 [node name="StereoWallDisplay" type="Node3D" parent="."]
 script = ExtResource("1_stereo")
+edit_mode = false
 tracking_type = 1
 vive_tracker_role = 10
 

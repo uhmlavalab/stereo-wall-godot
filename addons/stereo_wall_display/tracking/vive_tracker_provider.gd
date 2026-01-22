@@ -51,7 +51,8 @@ var _xr_interface: XRInterface
 var _tracker: XRPositionalTracker
 var _search_attempts: int = 0
 var _max_search_attempts: int = 60  # ~1 second at 60fps before giving up initial search
-var _xr_viewport: SubViewport  # Hidden viewport to keep XR session alive
+var _xr_origin: XROrigin3D  # XR origin to keep session alive
+var _xr_camera: XRCamera3D  # XR camera for session
 
 ## Initializes OpenXR and begins searching for the configured tracker role.
 func start() -> bool:
@@ -73,6 +74,9 @@ func start() -> bool:
 	
 	print("[ViveTracker] OpenXR initialized successfully")
 	
+	# Set up minimal XR scene to keep session alive and get tracker poses
+	_setup_xr_session()
+	
 	# Debug: List all available trackers at startup
 	_debug_available_trackers()
 	
@@ -92,6 +96,25 @@ func start() -> bool:
 			XRServer.tracker_removed.connect(_on_tracker_removed)
 	
 	return true
+
+## Sets up a minimal XR scene to keep OpenXR session alive for tracker poses.
+func _setup_xr_session():
+	# Get the main viewport and enable XR on it
+	var main_viewport = Engine.get_main_loop().root
+	if main_viewport:
+		main_viewport.use_xr = true
+		print("[ViveTracker] Enabled XR on main viewport")
+	
+	# Create XR origin if it doesn't exist - needed for tracker session
+	if not _xr_origin:
+		_xr_origin = XROrigin3D.new()
+		_xr_origin.name = "_ViveTrackerXROrigin"
+		_xr_camera = XRCamera3D.new()
+		_xr_camera.name = "_ViveTrackerXRCamera"
+		_xr_origin.add_child(_xr_camera)
+		# Add to scene but make invisible
+		Engine.get_main_loop().root.add_child(_xr_origin)
+		print("[ViveTracker] Created XR origin for tracker session")
 
 ## Searches for a Vive Tracker with the configured role.
 func _find_tracker():
@@ -172,6 +195,18 @@ func stop():
 		XRServer.tracker_added.disconnect(_on_tracker_added)
 	if XRServer.tracker_removed.is_connected(_on_tracker_removed):
 		XRServer.tracker_removed.disconnect(_on_tracker_removed)
+	
+	# Clean up XR session nodes
+	if _xr_origin and is_instance_valid(_xr_origin):
+		_xr_origin.queue_free()
+		_xr_origin = null
+		_xr_camera = null
+	
+	# Disable XR on main viewport
+	var main_viewport = Engine.get_main_loop().root
+	if main_viewport:
+		main_viewport.use_xr = false
+	
 	_tracker = null
 	_is_tracking = false
 	_search_attempts = 0
