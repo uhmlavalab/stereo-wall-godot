@@ -1,6 +1,6 @@
-[gd_scene load_steps=10 format=3 uid="uid://cuysaumvlft0x"]
+[gd_scene format=3 uid="uid://cuysaumvlft0x"]
 
-[ext_resource type="Script" uid="uid://d2mxktnyjcc1a" path="res://addons/stereo_wall_display/stereo_wall_display.gd" id="1_stereo"]
+[ext_resource type="PackedScene" path="res://addons/stereo_wall_display/stereo_wall_rig.tscn" id="1_rig"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_horizon_color = Color(0.65, 0.65, 0.67, 1)
@@ -18,7 +18,6 @@ ambient_light_energy = 0.4
 tonemap_mode = 2
 ssao_enabled = true
 glow_enabled = true
-glow_intensity = 0.3
 
 [sub_resource type="StandardMaterial3D" id="mat_floor"]
 albedo_color = Color(0.35, 0.38, 0.4, 1)
@@ -35,85 +34,105 @@ albedo_color = Color(0.2, 0.5, 0.9, 1)
 [sub_resource type="StandardMaterial3D" id="mat_green"]
 albedo_color = Color(0.2, 0.8, 0.4, 1)
 
-[node name="ExampleScene" type="Node3D"]
+[node name="ExampleScene" type="Node3D" unique_id=899459582]
 
-[node name="StereoWallDisplay" type="Node" parent="."]
-script = ExtResource("1_stereo")
+[node name="StereoWallRig" parent="." unique_id=2058782014 instance=ExtResource("1_rig")]
+controls = 1
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1600053774]
 environment = SubResource("Environment_1")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=505754109]
 transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 5, 10, 5)
 shadow_enabled = true
 directional_shadow_max_distance = 50.0
 
-[node name="Floor" type="CSGBox3D" parent="."]
+[node name="Floor" type="CSGBox3D" parent="." unique_id=635798681]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, -12.191)
 use_collision = true
 size = Vector3(40, 0.2, 40)
 material = SubResource("mat_floor")
 
-[node name="BackWall" type="CSGBox3D" parent="."]
+[node name="BackWall" type="CSGBox3D" parent="." unique_id=153505229]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 7.80901)
 use_collision = true
 size = Vector3(40, 10, 0.3)
 material = SubResource("mat_wall")
 
-[node name="LeftWall" type="CSGBox3D" parent="."]
+[node name="LeftWall" type="CSGBox3D" parent="." unique_id=1204958046]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 4, -12.191)
 use_collision = true
 size = Vector3(0.3, 10, 40)
 material = SubResource("mat_wall")
 
-[node name="RightWall" type="CSGBox3D" parent="."]
+[node name="RightWall" type="CSGBox3D" parent="." unique_id=1157509252]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 4, -12.191)
 use_collision = true
 size = Vector3(0.3, 10, 40)
 material = SubResource("mat_wall")
 
-[node name="RedCube" type="CSGBox3D" parent="."]
+[node name="RedCube" type="CSGBox3D" parent="." unique_id=1499044012]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -16.191)
 use_collision = true
 material = SubResource("mat_red")
 
-[node name="BlueCube" type="CSGBox3D" parent="."]
+[node name="BlueCube" type="CSGBox3D" parent="." unique_id=42864437]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.75, -14.191)
 use_collision = true
 size = Vector3(1.5, 1.5, 1.5)
 material = SubResource("mat_blue")
 
-[node name="GreenCube" type="CSGBox3D" parent="."]
+[node name="GreenCube" type="CSGBox3D" parent="." unique_id=1807250767]
 transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 0, 0.4, -18.191)
 use_collision = true
 size = Vector3(0.8, 0.8, 0.8)
 material = SubResource("mat_green")
 
-[node name="Pillar1" type="CSGCylinder3D" parent="."]
+[node name="Pillar1" type="CSGCylinder3D" parent="." unique_id=2119440480]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, -10.191)
 use_collision = true
 height = 3.0
 material = SubResource("mat_wall")
 
-[node name="Pillar2" type="CSGCylinder3D" parent="."]
+[node name="Pillar2" type="CSGCylinder3D" parent="." unique_id=745318128]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -10.191)
 use_collision = true
 height = 3.0
 material = SubResource("mat_wall")
 
-[node name="Sphere" type="CSGSphere3D" parent="."]
+[node name="Sphere" type="CSGSphere3D" parent="." unique_id=299823421]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.6, -12.191)
 use_collision = true
 radius = 0.6
 
-[node name="Platform" type="CSGBox3D" parent="."]
+[node name="Platform" type="CSGBox3D" parent="." unique_id=201921059]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.5, -7.19099)
 use_collision = true
 size = Vector3(5, 1, 3)
 material = SubResource("mat_floor")
 
-[node name="Ramp" type="CSGBox3D" parent="."]
+[node name="Ramp" type="CSGBox3D" parent="." unique_id=1029334856]
 transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, 8, 0.25, -10.191)
 use_collision = true
 size = Vector3(2, 0.2, 4)
 material = SubResource("mat_floor")
+
+[node name="PopOutOrb" type="CSGSphere3D" parent="." unique_id=1830219975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 1.5, -1.2)
+radius = 0.2
+material = SubResource("mat_red")
+
+[node name="PopOutLabel" type="Label3D" parent="PopOutOrb" unique_id=119671040]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+pixel_size = 0.001
+billboard = 1
+text = "In front of the wall:
+pops out of the screen"
+font_size = 48
+
+[node name="BehindLabel" type="Label3D" parent="." unique_id=1373252463]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -14)
+pixel_size = 0.01
+billboard = 1
+text = "Behind the wall: inside the screen"
+font_size = 64
