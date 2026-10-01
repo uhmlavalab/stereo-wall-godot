@@ -12,21 +12,9 @@ extends CharacterBody3D
 enum Mode { AUTO, EDIT, STEREO }
 enum Controls { WALK, FLY, NONE }
 
-## Hotkeys. Rebind them in Project Settings > Input Map.
-const ACTIONS := {
-	"stereo_help": KEY_F1,
-	"stereo_toggle_mode": KEY_F2,
-	"stereo_toggle_3d": KEY_F3,
-	"stereo_swap_eyes": KEY_F4,
-	"stereo_toggle_tracking": KEY_F5,
-	"stereo_calibrate": KEY_F6,
-	"stereo_reset": KEY_R,
-	"stereo_quit": KEY_ESCAPE,
-}
-
 const HELP := """F1 Help   F2 Edit/Stereo   F3 3D on/off   F4 Swap eyes
-F5 Head tracking   F6 Calibrate   R Reset   Esc Quit
-WASD / Left stick = Move   Mouse / Right stick = Look   Shift / L3 = Fast
+F5 Head tracking   F6 Calibrate   Esc Quit
+WASD / Left stick = Move   Mouse / Right stick = Look   Shift / L3 = Fast   R = Reset
 Walk: Space / A = Jump      Fly: E / RB = Up   Q / LB = Down"""
 
 @export var mode := Mode.AUTO  ## Auto = Edit when run from Godot, Stereo in exported builds. Override with --edit / --stereo.
@@ -35,12 +23,17 @@ Walk: Space / A = Jump      Fly: E / RB = Up   Q / LB = Down"""
 		show_wall = value
 		if is_node_ready():
 			_update_wall_gizmo()
-@export var controls := Controls.WALK  ## Walk = FPS with gravity. Fly = move freely, no collisions. None = no built-in movement (move the rig from your own code).
+@export var controls := Controls.WALK:  ## Walk = FPS with gravity. Fly = move freely, no collisions. None = no built-in movement (move the rig from your own code).
+	set(value):
+		controls = value
+		notify_property_list_changed()  # Show only the settings this control scheme uses
 @export var move_speed := 5.0  ## Meters per second (Shift / L3 doubles it)
 @export var jump_velocity := 4.5  ## Walk mode
 @export var look_sensitivity := 0.002  ## Mouse
 @export var controller_look_speed := 0.05  ## Right stick
 @export var controller_deadzone := 0.15
+
+const MOVEMENT_SETTINGS := ["move_speed", "jump_velocity", "look_sensitivity", "controller_look_speed", "controller_deadzone"]
 
 var cfg: StereoWallConfig
 var tracker: StereoHeadTracker
@@ -76,7 +69,6 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 
-	add_default_actions()
 	tracker = StereoHeadTracker.new(cfg)
 	_stereo_3d = cfg.stereo_enabled
 	_swap_eyes = cfg.swap_eyes
@@ -94,15 +86,6 @@ func _ready() -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_apply_mode()
 
-
-## Adds any hotkey actions the project hasn't defined itself.
-static func add_default_actions() -> void:
-	for action in ACTIONS:
-		if not InputMap.has_action(action):
-			var key := InputEventKey.new()
-			key.physical_keycode = ACTIONS[action]
-			InputMap.add_action(action)
-			InputMap.action_add_event(action, key)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #                              MODES & WINDOW
@@ -160,6 +143,13 @@ func _apply_mode() -> void:
 
 
 ## The wall rectangle is a development aid: never shown in stereo output.
+## Hides movement settings in the Inspector when they don't apply (values are kept).
+func _validate_property(property: Dictionary) -> void:
+	var name: String = property.name
+	if (controls == Controls.NONE and name in MOVEMENT_SETTINGS) or (controls == Controls.FLY and name == "jump_velocity"):
+		property.usage = PROPERTY_USAGE_NO_EDITOR
+
+
 func _update_wall_gizmo() -> void:
 	_wall_gizmo.visible = show_wall and (Engine.is_editor_hint() or mode != Mode.STEREO)
 
@@ -178,27 +168,34 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseMotion and controls != Controls.NONE and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_apply_look(event.relative * look_sensitivity)
-	elif event.is_action_pressed("stereo_quit"):
-		get_tree().quit()
-	elif event.is_action_pressed("stereo_reset"):
-		_reset_position()
-	elif event.is_action_pressed("stereo_help"):
-		_show_help = not _show_help
-	elif event.is_action_pressed("stereo_toggle_mode"):
-		mode = Mode.STEREO if mode == Mode.EDIT else Mode.EDIT
-		_apply_mode()
-	elif event.is_action_pressed("stereo_toggle_3d"):
-		_stereo_3d = not _stereo_3d
-		_flash("3D " + ("on" if _stereo_3d else "off (mono)"))
-	elif event.is_action_pressed("stereo_swap_eyes"):
-		_swap_eyes = not _swap_eyes
-		_layout_displays()
-		_flash("Eyes swapped" if _swap_eyes else "Eyes normal")
-	elif event.is_action_pressed("stereo_toggle_tracking"):
-		tracker.enabled = not tracker.enabled
-		_flash("Head tracking " + ("on" if tracker.enabled else "off"))
-	elif event.is_action_pressed("stereo_calibrate"):
-		_calibrate()
+	elif event is InputEventKey and event.pressed and not event.echo:
+		_hotkey(event.physical_keycode)
+
+
+## F1-F6 and Esc are fixed and always on, so apps shouldn't use them. R is a movement control.
+func _hotkey(key: Key) -> void:
+	match key:
+		KEY_ESCAPE:
+			get_tree().quit()
+		KEY_R when controls != Controls.NONE:
+			_reset_position()
+		KEY_F1:
+			_show_help = not _show_help
+		KEY_F2:
+			mode = Mode.STEREO if mode == Mode.EDIT else Mode.EDIT
+			_apply_mode()
+		KEY_F3:
+			_stereo_3d = not _stereo_3d
+			_flash("3D " + ("on" if _stereo_3d else "off (mono)"))
+		KEY_F4:
+			_swap_eyes = not _swap_eyes
+			_layout_displays()
+			_flash("Eyes swapped" if _swap_eyes else "Eyes normal")
+		KEY_F5:
+			tracker.enabled = not tracker.enabled
+			_flash("Head tracking " + ("on" if tracker.enabled else "off"))
+		KEY_F6:
+			_calibrate()
 
 
 func _reset_position() -> void:
