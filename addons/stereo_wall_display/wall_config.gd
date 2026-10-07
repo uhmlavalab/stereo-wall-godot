@@ -1,12 +1,13 @@
 @tool
 class_name StereoWallConfig
 extends RefCounted
-## Machine settings for the physical wall, read from STEREO_CONFIG_GODOT.cfg.
-##
-## Search order: $STEREO_WALL_CONFIG, then ~/STEREO_CONFIG_GODOT.cfg,
-## then next to the executable. Missing file = built-in defaults below.
+## Machine settings for the physical wall, from a fixed folder:
+## C:/StereoWallGodot/ on Windows, ~/StereoWallGodot/ elsewhere. It holds two files:
+## STEREO_CONFIG_GODOT.cfg (hand-edited, never written by the rig; missing = defaults below)
+## and STEREO_CALIBRATION_GODOT.cfg (written by F6).
 
 const FILE_NAME := "STEREO_CONFIG_GODOT.cfg"
+const CALIBRATION_FILE_NAME := "STEREO_CALIBRATION_GODOT.cfg"
 
 ## Which keys live in which [section] of the file.
 const SECTIONS := {
@@ -14,10 +15,12 @@ const SECTIONS := {
 	"wall": ["wall_width", "wall_height", "wall_center_height", "wall_distance", "wall_offset_x"],
 	"render": ["eye_separation", "near_clip", "far_clip"],
 	"tracking": ["tracking_enabled", "udp_port", "smoothing", "timeout_sec", "axis_sign", "scale", "camera_pitch"],
-	"calibration": ["tracker_origin", "sweet_spot"],
+	"calibration": ["sweet_spot"],
 }
 
-var path := ""  ## File this config was loaded from ("" = defaults)
+var path := folder().path_join(FILE_NAME)
+var calibration_path := folder().path_join(CALIBRATION_FILE_NAME)
+var loaded := false  ## False = file missing, using defaults
 
 # [display]
 var resolution_width := 4800  ## Pixels per eye
@@ -44,66 +47,32 @@ var axis_sign := Vector3.ONE  ## Flip an axis with -1
 var scale := 0.01  ## Tracker units to meters (OpenTrack sends cm)
 var camera_pitch := 0.0  ## Degrees the camera tilts down (negative = tilted up)
 # [calibration]
-var tracker_origin := Vector3.ZERO  ## Tracker reading at the sweet spot (set by calibrate)
+var tracker_origin := Vector3.ZERO  ## Tracker reading at the sweet spot (from the calibration file)
 var sweet_spot := Vector3(0, 1.64, 0)  ## Ideal eye position in the room
 
 
 func _init() -> void:
-	for candidate in _candidates():
-		if FileAccess.file_exists(candidate):
-			path = candidate
-			break
-	if path == "":
-		return  # No file: keep the defaults
 	var file := ConfigFile.new()
-	file.load(path)
-	for section in SECTIONS:
-		for key in SECTIONS[section]:
-			set(key, file.get_value(section, key, get(key)))
+	loaded = file.load(path) == OK
+	if loaded:  # Otherwise keep the defaults
+		for section in SECTIONS:
+			for key in SECTIONS[section]:
+				set(key, file.get_value(section, key, get(key)))
+	var calibration := ConfigFile.new()
+	if calibration.load(calibration_path) == OK:
+		tracker_origin = calibration.get_value("calibration", "tracker_origin", tracker_origin)
 
 
-## Writes every setting back to the loaded file (or the first search location).
-## Edits the file line by line so comments and layout are kept.
-func save() -> void:
-	if path == "":
-		path = _candidates()[0]
-	var text := FileAccess.get_file_as_string(path)
-	var body := text.replace("\r\n", "\n").strip_edges(false, true)
-	var lines := body.split("\n") if body != "" else PackedStringArray()
-	for section in SECTIONS:
-		var insert_at := -1  # Where missing keys of this section go, in order
-		for key in SECTIONS[section]:
-			var entry := "%s=%s" % [key, var_to_str(get(key))]
-			var i := _find_line(lines, func(l: String) -> bool: return l.get_slice("=", 0).strip_edges() == key)
-			if i >= 0:
-				var comment := lines[i].find(";")  # Keep the comment in the same column
-				lines[i] = entry if comment < 0 else entry + " ".repeat(maxi(1, comment - entry.length())) + lines[i].substr(comment)
-				continue
-			if insert_at < 0:
-				insert_at = _find_line(lines, func(l: String) -> bool: return l.strip_edges() == "[%s]" % section) + 1
-			if insert_at == 0:  # Section missing too: add it at the end
-				lines.append_array(["", "[%s]" % section] if not lines.is_empty() else ["[%s]" % section])
-				insert_at = lines.size()
-			lines.insert(insert_at, entry)
-			insert_at += 1
-	var newline := "\r\n" if "\r\n" in text else "\n"
-	FileAccess.open(path, FileAccess.WRITE).store_string(newline.join(lines) + newline)
+## Writes tracker_origin to the calibration file, which belongs to F6 alone,
+## so the hand-edited config is never touched. Returns false on failure.
+func save_calibration() -> bool:
+	DirAccess.make_dir_recursive_absolute(calibration_path.get_base_dir())
+	var file := FileAccess.open(calibration_path, FileAccess.WRITE)
+	if file == null:
+		return false
+	file.store_string("; Written by F6 (calibrate). Delete this file to reset calibration.\n[calibration]\ntracker_origin=%s\n" % var_to_str(tracker_origin))
+	return true
 
 
-func _find_line(lines: PackedStringArray, matches: Callable) -> int:
-	for i in lines.size():
-		if not lines[i].strip_edges().begins_with(";") and matches.call(lines[i]):
-			return i
-	return -1
-
-
-func _candidates() -> Array[String]:
-	var list: Array[String] = []
-	var env := OS.get_environment("STEREO_WALL_CONFIG")
-	if env != "":
-		list.append(env)
-	for home in [OS.get_environment("HOME"), OS.get_environment("USERPROFILE")]:
-		if home != "":
-			list.append(home.path_join(FILE_NAME))
-	list.append(OS.get_executable_path().get_base_dir().path_join(FILE_NAME))
-	return list
+static func folder() -> String:
+	return "C:/StereoWallGodot" if OS.get_name() == "Windows" else OS.get_environment("HOME").path_join("StereoWallGodot")

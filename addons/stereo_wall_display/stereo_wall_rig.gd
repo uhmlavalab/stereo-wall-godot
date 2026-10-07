@@ -12,10 +12,13 @@ extends CharacterBody3D
 enum Mode { AUTO, EDIT, STEREO }
 enum Controls { WALK, FLY, NONE }
 
-const HELP := """F1 Help   F2 Edit/Stereo   F3 3D on/off   F4 Swap eyes
-F5 Head tracking   F6 Calibrate   Esc Quit
-WASD / Left stick = Move   Mouse / Right stick = Look   Shift / L3 = Fast   R = Reset
-Walk: Space / A = Jump      Fly: E / RB = Up   Q / LB = Down"""
+## F1 help, one key per line in order. Movement lines only show when they apply.
+const HELP_KEYS := ["F1   Help", "F2   Edit / Stereo", "F3   3D on / off", "F4   Swap eyes",
+	"F5   Head tracking on / off", "F6   Calibrate", "Esc   Quit"]
+const HELP_MOVE := ["WASD / Left stick   Move", "Mouse / Right stick   Look",
+	"Shift / L3   Fast", "R   Reset position"]
+const HELP_WALK := ["Space / A   Jump"]
+const HELP_FLY := ["E / RB   Up", "Q / LB   Down"]
 
 @export var mode := Mode.AUTO  ## Auto = Edit when run from Godot, Stereo in exported builds. Override with --edit / --stereo.
 @export var show_wall := true:  ## Show the wall rectangle in the editor and in Edit mode
@@ -316,11 +319,9 @@ func _calibrate() -> void:
 	tracker.begin_calibration()
 	await get_tree().create_timer(1.0).timeout
 	tracker.end_calibration()
-	cfg.tracking_enabled = true
-	cfg.save()
 	tracker.enabled = true
 	_calibrating = false
-	_flash("Calibrated. Saved to " + cfg.path)
+	_flash(("Calibrated. Saved to " if cfg.save_calibration() else "Calibrated, but could not save ") + cfg.calibration_path)
 
 
 ## Shows a message on the HUD for a few seconds.
@@ -335,14 +336,16 @@ func _update_hud() -> void:
 	var lines: Array[String] = []
 	if mode == Mode.EDIT:
 		lines.append("EDIT MODE  -  F2 for stereo, F1 for help")
-	if mode == Mode.STEREO and cfg.path == "":
-		lines.append("No machine config (%s) - using defaults" % StereoWallConfig.FILE_NAME)
+	if mode == Mode.STEREO and not cfg.loaded:
+		lines.append("No machine config (%s) - using defaults" % cfg.path)
 	if tracker.enabled and not tracker.is_live():
 		lines.append("Head tracking: no data on UDP port %d" % cfg.udp_port)
 	if _message != "":
 		lines.append(_message)
 	if _show_help:
-		lines.append(HELP)
+		lines.append_array(HELP_KEYS)
+		if controls != Controls.NONE:
+			lines.append_array(HELP_MOVE + (HELP_WALK if controls == Controls.WALK else HELP_FLY))
 	_hud.text = "\n".join(lines)
 	# In stereo, repeat the text on the right-eye half so both eyes see it.
 	_hud_right.visible = mode == Mode.STEREO

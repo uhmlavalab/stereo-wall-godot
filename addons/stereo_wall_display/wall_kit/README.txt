@@ -12,14 +12,16 @@ ONE-TIME SETUP
 3. Mount the webcam just above or below the wall, centered, facing the room.
 
 4. Double-click head_tracker.bat. The first run installs itself (a few
-   minutes, needs internet). In the camera window, a green dot should
-   appear between your eyes. Press Q to close it.
+   minutes, needs internet). In the camera window, green dots should
+   appear on your forehead, nose, mouth, chin and cheeks (glasses are fine). Press Q to close it.
    Wrong camera? Edit head_tracker.bat and change CAMERA=0 to CAMERA=1.
 
 5. Put a tape mark on the floor where the viewer should stand
    (the "sweet spot").
 
-6. Open STEREO_CONFIG_GODOT.cfg in Notepad and set:
+6. Create the folder C:\StereoWallGodot and move STEREO_CONFIG_GODOT.example.cfg
+   into it, renamed to STEREO_CONFIG_GODOT.cfg. All wall games use this one
+   file. Open it in Notepad and set:
      wall_width, wall_height   size of the wall picture (meters)
      wall_center_height        floor to the middle of the wall
      wall_distance             tape mark to the wall
@@ -35,16 +37,21 @@ EVERY DAY
 1. Double-click the START_WALL shortcut.
 2. Calibrate (first time, or after the camera moves): stand on the tape
    mark, look at the wall, press F6 and hold still until "Calibrated".
-   It's saved, so you don't need to do this every day.
+   It's saved to C:\StereoWallGodot\STEREO_CALIBRATION_GODOT.cfg, so you
+   don't need to do this every day. Your config file is never changed.
 3. Press Esc to quit. Head tracking stops by itself.
 
 
 KEYS
 ----
-F1  Help                  F4  Swap left/right eyes
-F2  Switch Edit/Stereo    F5  Head tracking on/off
-F3  3D on/off             F6  Calibrate
-WASD / mouse / gamepad = move and look    R = reset position    Esc = quit
+F1   Help
+F2   Switch Edit/Stereo
+F3   3D on/off
+F4   Swap left/right eyes
+F5   Head tracking on/off
+F6   Calibrate
+Esc  Quit
+WASD / mouse / gamepad = move and look    R = reset position
 
 
 TROUBLESHOOTING

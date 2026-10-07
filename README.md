@@ -54,14 +54,13 @@ On a Mac laptop, hold **Fn** for F-keys.
 
 1. **Project → Export** a **Windows Desktop** build into an empty folder.
 2. Copy the contents of `addons/stereo_wall_display/wall_kit/` into it (skip `.venv` and `face_landmarker.task`).
-3. Rename `STEREO_CONFIG_GODOT.example.cfg` to `STEREO_CONFIG_GODOT.cfg` and enter the wall's measurements.
+3. On the wall PC, create `C:\StereoWallGodot\`, put `STEREO_CONFIG_GODOT.example.cfg` in it renamed to `STEREO_CONFIG_GODOT.cfg`, and enter the wall's measurements. Every game on that PC shares this one file.
 4. Set `GAME=` in `START_WALL.bat` to your `.exe` name.
 5. Hand the folder over. `README.txt` inside tells the operator what to do.
 
 ```
 StereoWall/
 ├─ MyGame.exe, MyGame.pck      your export
-├─ STEREO_CONFIG_GODOT.cfg     wall settings
 ├─ START_WALL.bat              starts tracking + game
 ├─ head_tracker.bat            webcam tracking (installs itself)
 ├─ head_sender.py, requirements.txt
@@ -80,8 +79,8 @@ On a Mac, allow Camera access for Terminal in **System Settings → Privacy & Se
 
 ## Reference
 
-**Machine config.** `STEREO_CONFIG_GODOT.cfg` is looked up in: the `STEREO_WALL_CONFIG` environment variable, your home folder, then next to the `.exe`. Missing keys use defaults. Every setting is documented in [the example file](addons/stereo_wall_display/wall_kit/STEREO_CONFIG_GODOT.example.cfg). Coordinates are in meters: origin on the floor under the sweet spot, +X right, +Y up, wall at -Z.
+**Machine config.** `STEREO_CONFIG_GODOT.cfg` always lives in `C:\StereoWallGodot\` on Windows (`~/StereoWallGodot/` on Mac/Linux). The app never writes to it. F6 saves its calibration to `STEREO_CALIBRATION_GODOT.cfg` in the same folder (delete it to reset). Missing keys use defaults. Every setting is documented in [the example file](addons/stereo_wall_display/wall_kit/STEREO_CONFIG_GODOT.example.cfg). Coordinates are in meters: origin on the floor under the sweet spot, +X right, +Y up, wall at -Z.
 
-**Head tracking.** Godot listens on UDP 4242 for [OpenTrack](https://github.com/opentrack/opentrack)-format packets (x, y, z in cm, then yaw, pitch, roll). `head_sender.py` sends these from a webcam using MediaPipe; OpenTrack itself also works. F6 records the sweet-spot position, and movement is measured from there. Webcam depth comes from eye spacing, so it's approximate.
+**Head tracking.** Godot listens on UDP 4242 for [OpenTrack](https://github.com/opentrack/opentrack)-format packets (x, y, z in cm, then yaw, pitch, roll). `head_sender.py` sends these from a webcam using MediaPipe; OpenTrack itself also works. F6 records the sweet-spot position, and movement is measured from there. It never looks at the eyes, so 3D shutter glasses don't confuse it: the head pose is fitted from forehead, nose, mouth, chin and cheek points on an average face. Depth is approximate (faces vary in size).
 
 **Publishing:** see [PUBLISHING.md](PUBLISHING.md). **License:** MIT, see [LICENSE](LICENSE).
