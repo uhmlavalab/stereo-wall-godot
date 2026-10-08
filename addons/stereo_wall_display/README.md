@@ -16,7 +16,7 @@ You don't need to set up the display wall itself. The display wall PC already kn
 
 See `examples/example_scene.tscn` for a working scene.
 
-## What you see
+## Edit and Stereo mode
 
 - **Pressing Play in Godot** gives **Edit mode**: a normal window with one camera. The display wall is shown as a blue see-through rectangle.
 - **Your exported app** starts in **Stereo mode**: side-by-side left/right images for the display wall. Press F2 in either to switch.
@@ -55,7 +55,7 @@ Movement keys turn off when **Controls** is None, which frees them for your app.
 | E / RB, Q / LB | Up, down (Fly) |
 | R | Reset to start position |
 
-## Put your app on the display wall
+## Building for the display wall
 
 1. **Project → Export** a **Windows Desktop** build. Turn on **Embed PCK** so it's a single `.exe`.
 2. Copy the `.exe` into the display wall PC's apps folder (ask the display wall maintainer where it is).

@@ -16,19 +16,13 @@ Get the latest zip from the [Releases page](https://github.com/uhmlavalab/stereo
 
 To update, delete `addons/stereo_wall_display/` from your project and install the new zip.
 
-## Which guide do I need?
+## Documentation
 
-| You are… | Read |
-|----------|------|
-| Making an app for the display wall | [Plugin usage](addons/stereo_wall_display/README.md) |
-| Setting up or maintaining the display wall PC | [Display wall setup](addons/stereo_wall_display/display_wall_setup/README.md) |
-| Publishing a new version of this addon | [Releasing](RELEASING.md) |
-
-App developers don't need to set anything up on the display wall PC. That is done once by the display wall maintainer.
-
-## Head tracking
-
-Webcam head tracking is in progress on the `feature-headtracking` branch and is not part of the releases yet.
+| Guide | For |
+|-------|-----|
+| [Plugin usage](addons/stereo_wall_display/README.md) | Making apps for the display wall |
+| [Display wall setup](addons/stereo_wall_display/display_wall_setup/README.md) | Setting up the display wall PC |
+| [Releasing](RELEASING.md) | Publishing a new version of this addon |
 
 ## License
 
