@@ -9,12 +9,7 @@ A Godot 4.7+ addon for making apps that run on a large 3D display wall, built at
 
 ## Download
 
-Get the latest zip from the [Releases page](https://github.com/uhmlavalab/stereo-wall-godot/releases/latest). To add it to a Godot project:
-
-- **In Godot:** open the **AssetLib** tab, click **Import…**, pick the zip, and click **Install**.
-- **Or by hand:** unzip it and copy the `addons/stereo_wall_display` folder into your project's `addons/` folder.
-
-To update, delete `addons/stereo_wall_display/` from your project and install the new zip.
+Get the latest zip from the [Releases page](https://github.com/uhmlavalab/stereo-wall-godot/releases/latest), unzip it, and copy the `addons` folder into your Godot project folder. Full steps are in [Plugin usage](addons/stereo_wall_display/README.md#install).
 
 ## Documentation
 

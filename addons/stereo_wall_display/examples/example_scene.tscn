@@ -37,7 +37,6 @@ albedo_color = Color(0.2, 0.8, 0.4, 1)
 [node name="ExampleScene" type="Node3D" unique_id=899459582]
 
 [node name="StereoWallRig" parent="." unique_id=2058782014 instance=ExtResource("1_rig")]
-eye_height = 1.77
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1600053774]
 environment = SubResource("Environment_1")

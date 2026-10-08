@@ -4,15 +4,25 @@ For people making Godot apps for the stereo display wall. Godot 4.7+.
 
 You don't need to set up the display wall itself. The display wall PC already knows its own size and settings.
 
+## Install
+
+1. Download `stereo_wall_display-<version>.zip` from the [Releases page](https://github.com/uhmlavalab/stereo-wall-godot/releases/latest).
+2. Unzip it. Inside is an `addons` folder.
+3. Copy that `addons` folder into your Godot project folder (the one with `project.godot` in it). If your project already has an `addons` folder, put `stereo_wall_display` inside the existing one.
+4. Back in Godot, you'll see `res://addons/stereo_wall_display/` in the FileSystem dock.
+
+Or, in Godot: **AssetLib** tab → **Import…** → pick the zip → **Install**.
+
+To update, delete `addons/stereo_wall_display/` and install the new version the same way.
+
 ## Quick start
 
-1. Install the addon (see the [download steps](https://github.com/uhmlavalab/stereo-wall-godot#download)).
-2. Drag `addons/stereo_wall_display/stereo_wall_rig.tscn` into your scene where the viewer should start. The rig is the player.
-3. Pick the rig's **Controls** in the Inspector:
+1. Drag `addons/stereo_wall_display/stereo_wall_rig.tscn` into your scene where the viewer should start. The rig is the player.
+2. Pick the rig's **Controls** in the Inspector:
    - **Walk**: first-person movement with gravity, collisions and jumping.
    - **Fly**: free movement, straight through walls.
    - **None**: no built-in movement. Move the rig yourself (code, AnimationPlayer, or parent it to something).
-4. Press Play.
+3. Press Play.
 
 See `examples/example_scene.tscn` for a working scene.
 
