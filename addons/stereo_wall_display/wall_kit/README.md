@@ -2,7 +2,7 @@
 
 ## One-time setup
 
-1. Put a tape mark on the floor where the viewer should stand (the "sweet spot").
+1. Put a tape mark on the floor where the viewer should stand.
 2. Create the folder `C:\StereoWallGodot` and move `STEREO_CONFIG_GODOT.example.cfg` into it, renamed to `STEREO_CONFIG_GODOT.cfg`. All wall games use this one file. Open it in Notepad and set:
 
    | Setting | Meaning |
@@ -10,7 +10,8 @@
    | `wall_width`, `wall_height` | Size of the wall picture (meters) |
    | `wall_center_height` | Floor to the middle of the wall |
    | `wall_distance` | Tape mark to the wall |
-   | `sweet_spot` | Change 1.64 to your eye height (meters) |
+   | `wall_offset_x` | Wall center right (+) or left (-) of the tape mark; 0 = centered |
+   | `eye_height` | Floor to the viewer's eyes (meters) |
 
 ## Every day
 

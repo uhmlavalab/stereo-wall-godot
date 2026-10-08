@@ -1,6 +1,6 @@
 # Stereo Wall Display
 
-A Godot 4.7+ addon that turns a large 3D display wall into a single-wall "CAVE": side-by-side stereo with off-axis projection from a fixed viewer position (the "sweet spot").
+A Godot 4.7+ addon that turns a large 3D display wall into a single-wall "CAVE": side-by-side stereo with off-axis projection for a viewer standing at a fixed spot in front of the wall.
 
 ![Godot 4.7+](https://img.shields.io/badge/Godot-4.7+-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
@@ -59,6 +59,6 @@ The wall PC needs a one-time setup: its measurements go in `C:\StereoWallGodot\S
 
 ## Reference
 
-**Machine config.** `STEREO_CONFIG_GODOT.cfg` always lives in `C:\StereoWallGodot\` on Windows (`~/StereoWallGodot/` on Mac/Linux). The app never writes to it, and the editor preview uses it too, so copy the wall PC's file to each developer's computer. Any key the file doesn't set (or every key, when there is no file) comes from the rig's **Wall** settings in the Inspector, which default to LAVA lab's wall. Every setting is documented in [the example file](addons/stereo_wall_display/wall_kit/STEREO_CONFIG_GODOT.example.cfg). Coordinates are in meters: origin on the floor under the sweet spot, +X right, +Y up, wall at -Z.
+**Machine config.** `STEREO_CONFIG_GODOT.cfg` always lives in `C:\StereoWallGodot\` on Windows (`~/StereoWallGodot/` on Mac/Linux). The app never writes to it. The wall's size and position also appear in the rig's **Wall** settings in the Inspector (default: LAVA lab's wall). Run from Godot, the Inspector values are used. In exported builds the config file wins, and the Inspector values only fill in keys it doesn't set. Every setting is documented in [the example file](addons/stereo_wall_display/wall_kit/STEREO_CONFIG_GODOT.example.cfg). Coordinates are in meters: origin on the floor where the viewer stands, +X right, +Y up, wall at -Z.
 
 **Publishing:** see [PUBLISHING.md](PUBLISHING.md). **License:** MIT, see [LICENSE](LICENSE).

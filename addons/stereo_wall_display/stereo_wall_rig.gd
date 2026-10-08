@@ -6,7 +6,7 @@ extends CharacterBody3D
 ## Edit mode (default when you press Play in Godot): one normal camera, and the wall
 ## shown as a blue see-through rectangle. Stereo mode (default in exported builds):
 ## side-by-side output for the wall, using the machine config. The Room node holds
-## the wall and the head; the head sits at the sweet spot, giving off-axis projection.
+## the wall and the head; the head sits at eye height above the rig, giving off-axis projection.
 
 enum Mode { AUTO, EDIT, STEREO }
 enum Controls { WALK, FLY, NONE }
@@ -36,29 +36,30 @@ const HELP_FLY := ["E / RB   Up", "Q / LB   Down"]
 @export var controller_deadzone := 0.15
 
 @export_group("Wall")
-## Width of the wall picture, in meters.  See the note at the top of this group.
+## Width of the wall picture, in meters.  Hover the orange note above for where these values come from.
 @export var wall_width := 6.047:
 	set(value): wall_width = value; _place_wall()
-## Height of the wall picture, in meters.  See the note at the top of this group.
+## Height of the wall picture, in meters.  Hover the orange note above for where these values come from.
 @export var wall_height := 2.042:
 	set(value): wall_height = value; _place_wall()
-## Floor to the middle of the wall picture, in meters.  See the note at the top of this group.
+## Floor to the middle of the wall picture, in meters.  Hover the orange note above for where these values come from.
 @export var wall_center_height := 1.75:
 	set(value): wall_center_height = value; _place_wall()
-## Sweet spot (where the viewer stands) to the wall, in meters.  See the note at the top of this group.
+## Where the viewer stands to the wall, in meters.  Hover the orange note above for where these values come from.
 @export var wall_distance := 2.282:
 	set(value): wall_distance = value; _place_wall()
-## Wall center left (-) or right (+) of the sweet spot, in meters.  See the note at the top of this group.
+## How far the wall's center is to the right (+) or left (-) of where the viewer stands, in meters.
+## 0 = the viewer stands centered in front of the wall.  Hover the orange note above for where these values come from.
 @export var wall_offset_x := 0.0:
 	set(value): wall_offset_x = value; _place_wall()
-## The viewer's eye position in the room, in meters (y = eye height).  See the note at the top of this group.
-@export var sweet_spot := Vector3(0, 1.64, 0):
-	set(value): sweet_spot = value; _place_wall()
+## Floor to the viewer's eyes, in meters.  Hover the orange note above for where these values come from.
+@export var eye_height := 1.64:
+	set(value): eye_height = value; _place_wall()
 @export_group("")
 
 const MOVEMENT_SETTINGS := ["move_speed", "jump_velocity", "look_sensitivity", "controller_look_speed", "controller_deadzone"]
-## Inspector fallbacks for these machine config keys. The defaults are LAVA lab's wall.
-const WALL_SETTINGS := ["wall_width", "wall_height", "wall_center_height", "wall_distance", "wall_offset_x", "sweet_spot"]
+## Inspector values for these machine config keys. The defaults are LAVA lab's wall.
+const WALL_SETTINGS := ["wall_width", "wall_height", "wall_center_height", "wall_distance", "wall_offset_x", "eye_height"]
 
 var cfg: StereoWallConfig
 
@@ -159,17 +160,21 @@ func _apply_mode() -> void:
 	_layout_displays()
 
 
-## Loads the machine config (the Wall settings fill in any keys it doesn't set) and places the wall.
+## Loads the machine config and places the wall. Run from Godot, the Wall settings win;
+## in exported builds the config wins and the Wall settings fill in any keys it doesn't set.
 func _place_wall() -> void:
 	if not is_node_ready():
 		return
-	var defaults := {}
+	var wall := {}
 	for key in WALL_SETTINGS:
-		defaults[key] = get(key)
-	cfg = StereoWallConfig.new(defaults)
-	# The room pivots around the sweet spot, so looking up/down rotates around the eyes.
-	_room.position = cfg.sweet_spot
-	_wall.position = Vector3(cfg.wall_offset_x, cfg.wall_center_height, -cfg.wall_distance) - cfg.sweet_spot
+		wall[key] = get(key)
+	cfg = StereoWallConfig.new(wall)
+	if OS.has_feature("editor"):
+		for key in wall:
+			cfg.set(key, wall[key])
+	# The room pivots around the eyes, so looking up/down rotates around them.
+	_room.position = Vector3(0, cfg.eye_height, 0)
+	_wall.position = Vector3(cfg.wall_offset_x, cfg.wall_center_height - cfg.eye_height, -cfg.wall_distance)
 	_wall_gizmo.scale = Vector3(cfg.wall_width, cfg.wall_height, 1)
 
 
