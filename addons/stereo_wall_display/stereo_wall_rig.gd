@@ -36,29 +36,36 @@ const HELP_FLY := ["E / RB   Up", "Q / LB   Down"]
 @export var controller_deadzone := 0.15
 
 @export_group("Display Wall")
-## Width of the display wall picture, in meters.  Hover the orange note above for where these values come from.
+## Width of the display wall picture, in meters.
+## Don't change unless you know what you're doing. Exported builds use the display wall PC's config file instead.
 @export var wall_width := 6.047:
 	set(value): wall_width = value; _place_wall()
-## Height of the display wall picture, in meters.  Hover the orange note above for where these values come from.
+## Height of the display wall picture, in meters.
+## Don't change unless you know what you're doing. Exported builds use the display wall PC's config file instead.
 @export var wall_height := 2.042:
 	set(value): wall_height = value; _place_wall()
-## Floor to the middle of the display wall picture, in meters.  Hover the orange note above for where these values come from.
+## Floor to the middle of the display wall picture, in meters.
+## Don't change unless you know what you're doing. Exported builds use the display wall PC's config file instead.
 @export var wall_center_height := 1.75:
 	set(value): wall_center_height = value; _place_wall()
-## Where the viewer stands to the display wall, in meters.  Hover the orange note above for where these values come from.
+## Where the viewer stands to the display wall, in meters.
+## Don't change unless you know what you're doing. Exported builds use the display wall PC's config file instead.
 @export var wall_distance := 2.282:
 	set(value): wall_distance = value; _place_wall()
 ## How far the display wall's center is to the right (+) or left (-) of where the viewer stands, in meters.
-## 0 = the viewer stands centered in front of the display wall.  Hover the orange note above for where these values come from.
+## 0 = the viewer stands centered in front of the display wall.
+## Don't change unless you know what you're doing. Exported builds use the display wall PC's config file instead.
 @export var wall_offset_x := 0.0:
 	set(value): wall_offset_x = value; _place_wall()
-## Floor to the viewer's eyes, in meters.  Hover the orange note above for where these values come from.
+## Floor to the viewer's eyes, in meters.
+## Don't change unless you know what you're doing. Exported builds use the display wall PC's config file instead.
 @export var eye_height := 1.64:
 	set(value): eye_height = value; _place_wall()
 @export_group("")
 
 const MOVEMENT_SETTINGS := ["move_speed", "jump_velocity", "look_sensitivity", "controller_look_speed", "controller_deadzone"]
-## Inspector values for these machine config keys. The defaults are LAVA lab's wall.
+## Inspector values for these machine config keys (defaults: LAVA lab's display wall). Used when run
+## from Godot; exported builds use the config file and only fall back to these for missing keys.
 const WALL_SETTINGS := ["wall_width", "wall_height", "wall_center_height", "wall_distance", "wall_offset_x", "eye_height"]
 
 var cfg: StereoWallConfig
