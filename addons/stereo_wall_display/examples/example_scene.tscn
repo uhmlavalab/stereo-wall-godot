@@ -37,6 +37,7 @@ albedo_color = Color(0.2, 0.8, 0.4, 1)
 [node name="ExampleScene" type="Node3D" unique_id=899459582]
 
 [node name="StereoWallRig" parent="." unique_id=2058782014 instance=ExtResource("1_rig")]
+eye_height = 1.77
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1600053774]
 environment = SubResource("Environment_1")
@@ -123,21 +124,6 @@ size = Vector3(5, 0.2, 3.8725586)
 material = SubResource("mat_floor")
 
 [node name="PopOutOrb" type="CSGSphere3D" parent="." unique_id=1830219975]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 1.5, -1.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 1.5, -3.9964857)
 radius = 0.2
 material = SubResource("mat_red")
-
-[node name="PopOutLabel" type="Label3D" parent="PopOutOrb" unique_id=119671040]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
-pixel_size = 0.001
-billboard = 1
-text = "In front of the wall:
-pops out of the screen"
-font_size = 48
-
-[node name="BehindLabel" type="Label3D" parent="." unique_id=1373252463]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -14)
-pixel_size = 0.01
-billboard = 1
-text = "Behind the wall: inside the screen"
-font_size = 64
