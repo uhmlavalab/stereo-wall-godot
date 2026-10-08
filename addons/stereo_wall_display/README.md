@@ -1,6 +1,6 @@
 # Stereo Wall Display
 
-Turns a 3D display wall into a single-wall "CAVE": side-by-side stereo, off-axis projection and webcam head tracking. Godot 4.7+.
+Turns a 3D display wall into a single-wall "CAVE": side-by-side stereo with off-axis projection. Godot 4.7+.
 
 Full docs: https://github.com/uhmlavalab/stereo-wall-godot
 
@@ -15,7 +15,7 @@ Examples are in `examples/`.
 
 ## Keys
 
-**Hotkeys** (always on, so don't reuse them in your app): F1 help · F2 Edit/Stereo · F3 3D on/off · F4 swap eyes · F5 tracking · F6 calibrate · Esc quit
+**Hotkeys** (always on, so don't reuse them in your app): F1 help · F2 Edit/Stereo · F3 3D on/off · F4 swap eyes · Esc quit
 
 **Movement** (off when `controls` is None, which frees these keys): WASD/mouse or gamepad · Shift fast · Space jump (Walk) · E/Q up/down (Fly) · R reset
 

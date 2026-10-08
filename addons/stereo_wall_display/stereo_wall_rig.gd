@@ -3,18 +3,17 @@ class_name StereoWallRig
 extends CharacterBody3D
 ## Drop-in stereo wall rig. Move and rotate this scene to set where the viewer starts.
 ##
-## Edit mode (default when you press Play in Godot): one normal camera, no tracking,
-## and the wall shown as a blue see-through rectangle. Stereo mode (default in exported
-## builds): side-by-side output for the wall, with head tracking from the machine config.
-## The Room node holds the wall and the head; the wall stays fixed in the room
-## while the head moves with head tracking, giving correct off-axis parallax.
+## Edit mode (default when you press Play in Godot): one normal camera, and the wall
+## shown as a blue see-through rectangle. Stereo mode (default in exported builds):
+## side-by-side output for the wall, using the machine config. The Room node holds
+## the wall and the head; the head sits at the sweet spot, giving off-axis projection.
 
 enum Mode { AUTO, EDIT, STEREO }
 enum Controls { WALK, FLY, NONE }
 
 ## F1 help, one key per line in order. Movement lines only show when they apply.
 const HELP_KEYS := ["F1   Help", "F2   Edit / Stereo", "F3   3D on / off", "F4   Swap eyes",
-	"F5   Head tracking on / off", "F6   Calibrate", "Esc   Quit"]
+	"Esc   Quit"]
 const HELP_MOVE := ["WASD / Left stick   Move", "Mouse / Right stick   Look",
 	"Shift / L3   Fast", "R   Reset position"]
 const HELP_WALK := ["Space / A   Jump"]
@@ -39,13 +38,11 @@ const HELP_FLY := ["E / RB   Up", "Q / LB   Down"]
 const MOVEMENT_SETTINGS := ["move_speed", "jump_velocity", "look_sensitivity", "controller_look_speed", "controller_deadzone"]
 
 var cfg: StereoWallConfig
-var tracker: StereoHeadTracker
 
 var _stereo_3d := true
 var _swap_eyes := false
 var _show_help := false
-var _message := ""  # Temporary HUD text (calibration, errors)
-var _calibrating := false
+var _message := ""  # Temporary HUD text
 var _start: Transform3D
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 var _stereo_nodes: Array[Node] = []  # Viewports and canvas, freed when leaving stereo
@@ -72,7 +69,6 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 
-	tracker = StereoHeadTracker.new(cfg)
 	_stereo_3d = cfg.stereo_enabled
 	_swap_eyes = cfg.swap_eyes
 	_start = transform
@@ -102,9 +98,8 @@ func _apply_mode() -> void:
 	_displays.clear()
 	_edit_camera.current = mode == Mode.EDIT
 	_update_wall_gizmo()
-	tracker.enabled = mode == Mode.STEREO and cfg.tracking_enabled  # Edit mode: no tracking (F5 to test)
 	DisplayServer.window_set_title("Stereo Wall - " + ("EDIT MODE" if mode == Mode.EDIT else "STEREO"))
-	# Big enough text to read on the wall during calibration.
+	# Big enough text to read on the wall.
 	for label in [_hud, _hud_right]:
 		label.add_theme_font_size_override("font_size", 24 if mode == Mode.EDIT else int(cfg.resolution_height / 30.0))
 
@@ -175,7 +170,7 @@ func _input(event: InputEvent) -> void:
 		_hotkey(event.physical_keycode)
 
 
-## F1-F6 and Esc are fixed and always on, so apps shouldn't use them. R is a movement control.
+## F1-F4 and Esc are fixed and always on, so apps shouldn't use them. R is a movement control.
 func _hotkey(key: Key) -> void:
 	match key:
 		KEY_ESCAPE:
@@ -194,11 +189,6 @@ func _hotkey(key: Key) -> void:
 			_swap_eyes = not _swap_eyes
 			_layout_displays()
 			_flash("Eyes swapped" if _swap_eyes else "Eyes normal")
-		KEY_F5:
-			tracker.enabled = not tracker.enabled
-			_flash("Head tracking " + ("on" if tracker.enabled else "off"))
-		KEY_F6:
-			_calibrate()
 
 
 func _reset_position() -> void:
@@ -254,14 +244,12 @@ func _physics_process(delta: float) -> void:
 		global_position += (look.x * input.x + look.z * input.y + Vector3.UP * up) * speed * delta
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#                              HEAD TRACKING & RENDERING
+#                              RENDERING
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
-	tracker.poll()
-	_head.position = tracker.head_position - cfg.sweet_spot
 	if mode == Mode.STEREO:
 		_update_stereo_cameras()
 	_update_hud()
@@ -300,29 +288,8 @@ func _apply_offaxis_projection(camera: Camera3D, eye: Vector3, bl: Vector3, br: 
 	camera.global_transform = Transform3D(Basis(vr, vu, vn), eye)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#                              CALIBRATION & HUD
+#                              HUD
 # ═══════════════════════════════════════════════════════════════════════════════
-
-## Stand at the room center: the current tracker reading becomes the sweet spot.
-func _calibrate() -> void:
-	if _calibrating:
-		return
-	if not tracker.is_live():
-		_flash("Calibration needs tracking data on UDP port %d" % cfg.udp_port)
-		return
-	_calibrating = true
-	for i in range(3, 0, -1):
-		_message = "CALIBRATING: stand at the room center and look at the wall... %d" % i
-		await get_tree().create_timer(1.0).timeout
-
-	_message = "CALIBRATING: hold still..."
-	tracker.begin_calibration()
-	await get_tree().create_timer(1.0).timeout
-	tracker.end_calibration()
-	tracker.enabled = true
-	_calibrating = false
-	_flash(("Calibrated. Saved to " if cfg.save_calibration() else "Calibrated, but could not save ") + cfg.calibration_path)
-
 
 ## Shows a message on the HUD for a few seconds.
 func _flash(text: String) -> void:
@@ -338,8 +305,6 @@ func _update_hud() -> void:
 		lines.append("EDIT MODE  -  F2 for stereo, F1 for help")
 	if mode == Mode.STEREO and not cfg.loaded:
 		lines.append("No machine config (%s) - using defaults" % cfg.path)
-	if tracker.enabled and not tracker.is_live():
-		lines.append("Head tracking: no data on UDP port %d" % cfg.udp_port)
 	if _message != "":
 		lines.append(_message)
 	if _show_help:

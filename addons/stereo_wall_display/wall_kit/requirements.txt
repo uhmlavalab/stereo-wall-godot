@@ -1,2 +1,0 @@
-mediapipe==1.0.0  # 1.0.1 crashes on macOS (Metal init)
-opencv-python
