@@ -13,7 +13,15 @@ ONE-TIME SETUP
 
 4. Double-click head_tracker.bat. The first run installs itself (a few
    minutes, needs internet). In the camera window, green dots should
-   appear on your forehead, nose, mouth, chin and cheeks (glasses are fine). Press Q to close it.
+   appear on your forehead, nose, mouth, chin and cheeks.
+
+   With 3D glasses, a printed marker tracks much better than the face:
+   a. Edit head_tracker.bat: set MARKER=7, then run it once. It saves
+      marker.png in this folder.
+   b. Print marker.png, measure the black square in cm and put that
+      number in MARKER= (e.g. MARKER=6.5). Bigger is easier to see.
+   c. Tape it flat on the front of the 3D glasses (or a headband),
+      facing the camera. Green dots should appear on its corners. Press Q to close it.
    Wrong camera? Edit head_tracker.bat and change CAMERA=0 to CAMERA=1.
 
 5. Put a tape mark on the floor where the viewer should stand
