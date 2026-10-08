@@ -22,7 +22,6 @@ To update, delete `addons/stereo_wall_display/` from your project and install th
 |-------|-----|
 | [Plugin usage](addons/stereo_wall_display/README.md) | Making apps for the display wall |
 | [Display wall setup](addons/stereo_wall_display/display_wall_setup/README.md) | Setting up the display wall PC |
-| [Releasing](RELEASING.md) | Publishing a new version of this addon |
 
 ## License
 
