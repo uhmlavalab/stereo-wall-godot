@@ -1,6 +1,6 @@
 @tool
 extends EditorPlugin
-## Adds a warning note above the rig's Wall settings in the Inspector.
+## Adds a warning note above the rig's Display Wall settings in the Inspector.
 
 var _note := WallNote.new()
 

@@ -35,7 +35,7 @@ const HELP_FLY := ["E / RB   Up", "Q / LB   Down"]
 @export var controller_look_speed := 0.05  ## Right stick
 @export var controller_deadzone := 0.15
 
-@export_group("Wall")
+@export_group("Display Wall")
 ## Width of the wall picture, in meters.  Hover the orange note above for where these values come from.
 @export var wall_width := 6.047:
 	set(value): wall_width = value; _place_wall()
@@ -160,8 +160,8 @@ func _apply_mode() -> void:
 	_layout_displays()
 
 
-## Loads the machine config and places the wall. Run from Godot, the Wall settings win;
-## in exported builds the config wins and the Wall settings fill in any keys it doesn't set.
+## Loads the machine config and places the wall. Run from Godot, the Display Wall settings win;
+## in exported builds the config wins and the Display Wall settings fill in any keys it doesn't set.
 func _place_wall() -> void:
 	if not is_node_ready():
 		return
@@ -342,7 +342,7 @@ func _update_hud() -> void:
 	if mode == Mode.EDIT:
 		lines.append("EDIT MODE  -  F2 for stereo, F1 for help")
 	if mode == Mode.STEREO and not cfg.loaded:
-		lines.append("No machine config (%s) - using the rig's Wall settings" % cfg.path)
+		lines.append("No machine config (%s) - using the rig's Display Wall settings" % cfg.path)
 	if _message != "":
 		lines.append(_message)
 	if _show_help:

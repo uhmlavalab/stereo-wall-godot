@@ -4,7 +4,7 @@ extends RefCounted
 ## Machine settings for the physical wall, read from STEREO_CONFIG_GODOT.cfg in
 ## C:/StereoWallGodot/ on Windows (~/StereoWallGodot/ elsewhere). The file is
 ## hand-edited and never written by the rig; missing keys use the defaults passed in
-## (the rig's Wall settings in the Inspector) or the values below.
+## (the rig's Display Wall settings in the Inspector) or the values below.
 
 const FILE_NAME := "STEREO_CONFIG_GODOT.cfg"
 
