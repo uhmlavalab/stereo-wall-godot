@@ -140,7 +140,6 @@ func _apply_mode() -> void:
 	_layout_displays()
 
 
-## The wall rectangle is a development aid: never shown in stereo output.
 ## Hides movement settings in the Inspector when they don't apply (values are kept).
 func _validate_property(property: Dictionary) -> void:
 	var name: String = property.name
@@ -148,6 +147,7 @@ func _validate_property(property: Dictionary) -> void:
 		property.usage = PROPERTY_USAGE_NO_EDITOR
 
 
+## The wall rectangle is a development aid: never shown in stereo output.
 func _update_wall_gizmo() -> void:
 	_wall_gizmo.visible = show_wall and (Engine.is_editor_hint() or mode != Mode.STEREO)
 

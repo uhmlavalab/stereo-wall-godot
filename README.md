@@ -50,18 +50,10 @@ On a Mac laptop, hold **Fn** for F-keys.
 
 ## Build for the wall
 
-1. **Project → Export** a **Windows Desktop** build into an empty folder.
-2. Copy the contents of `addons/stereo_wall_display/wall_kit/` into it.
-3. On the wall PC, create `C:\StereoWallGodot\`, put `STEREO_CONFIG_GODOT.example.cfg` in it renamed to `STEREO_CONFIG_GODOT.cfg`, and enter the wall's measurements. Every game on that PC shares this one file.
-4. Set `GAME=` in `START_WALL.bat` to your `.exe` name.
-5. Hand the folder over. `README.txt` inside tells the operator what to do.
+1. **Project → Export** a **Windows Desktop** build. Turn on **Embed PCK** to get a single `.exe`.
+2. Put the `.exe` in the wall PC's builds folder and double-click it. Exported builds start in stereo.
 
-```
-StereoWall/
-├─ MyGame.exe, MyGame.pck      your export
-├─ START_WALL.bat              starts the game
-└─ README.txt                  operator instructions
-```
+The wall PC needs a one-time setup: its measurements go in `C:\StereoWallGodot\STEREO_CONFIG_GODOT.cfg`, which every game on that PC shares. See [`wall_kit/README.md`](addons/stereo_wall_display/wall_kit/README.md).
 
 `--edit` and `--stereo` on the command line override the automatic mode.
 

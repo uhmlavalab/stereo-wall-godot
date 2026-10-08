@@ -4,23 +4,23 @@ The new store is at [store.godotengine.org](https://store.godotengine.org). The 
 
 ## The repo is already set up for it
 
-- Everything users need is in `addons/stereo_wall_display/`, including `README.md`, `LICENSE`, `plugin.cfg`, the icon, `examples/` and `wall_kit/`.
+- Everything users need is in `addons/stereo_wall_display/`, including `README.md`, `LICENSE`, `plugin.cfg`, the icon, `examples/` and `wall_kit/` (wall PC setup).
 - `LICENSE` is at the repo root (required).
-- `.gitignore` keeps `.godot/`, `.venv/`, `*.import` and the downloaded model out of the repo (required).
-- `.gitattributes` uses `export-ignore`, so `git archive` only packs `addons/`, and it keeps `.bat` files with Windows line endings.
+- `.gitignore` keeps `.godot/` and `*.import` out of the repo (required).
+- `.gitattributes` uses `export-ignore`, so `git archive` only packs `addons/`.
 - `screenshots/` has a `.gdignore`, so Godot doesn't import it.
 
 ## Releasing a version
 
 1. Bump `version` in `addons/stereo_wall_display/plugin.cfg`.
-2. Open the project in Godot and run both scenes in `examples/` to check they work (the store rejects assets that don't).
+2. Open the project in Godot and run `examples/example_scene.tscn` in Edit mode and Stereo mode (F2) to check it works (the store rejects assets that don't).
 3. Commit, tag and build the zip:
    ```sh
    git tag v2.0.0
    git push origin main --tags
    git archive --format=zip --output stereo_wall_display-2.0.0.zip v2.0.0
    ```
-   The zip contains only `addons/stereo_wall_display/…` and is about 25 KB.
+   The zip contains only `addons/stereo_wall_display/…`.
 4. On the store, open your asset → **Versions** → upload the zip, write a changelog, and set **minimum Godot version: 4.7**.
 
 ## First-time submission
