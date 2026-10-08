@@ -6,14 +6,13 @@ You don't need to set up the display wall itself. The display wall PC already kn
 
 ## Install
 
-1. Download `stereo_wall_display-<version>.zip` from the [Releases page](https://github.com/uhmlavalab/stereo-wall-godot/releases/latest).
-2. Unzip it. Inside is an `addons` folder.
-3. Copy that `addons` folder into your Godot project folder (the one with `project.godot` in it). If your project already has an `addons` folder, put `stereo_wall_display` inside the existing one.
-4. Back in Godot, you'll see `res://addons/stereo_wall_display/` in the FileSystem dock.
+1. Download `stereo_wall_display-<version>.zip` from the [Releases page](https://github.com/uhmlavalab/stereo-wall-godot/releases/latest). Don't unzip it.
+2. In Godot, open the **AssetLib** tab at the top of the editor and click **Import…**.
+3. Pick the zip, then click **Install**.
 
-Or, in Godot: **AssetLib** tab → **Import…** → pick the zip → **Install**.
+It installs to `res://addons/stereo_wall_display/` and doesn't touch your other addons.
 
-To update, delete `addons/stereo_wall_display/` and install the new version the same way.
+To update, delete `addons/stereo_wall_display/` first, then import the new zip.
 
 ## Quick start
 
