@@ -59,6 +59,6 @@ The wall PC needs a one-time setup: its measurements go in `C:\StereoWallGodot\S
 
 ## Reference
 
-**Machine config.** `STEREO_CONFIG_GODOT.cfg` always lives in `C:\StereoWallGodot\` on Windows (`~/StereoWallGodot/` on Mac/Linux). The app never writes to it. Missing keys use defaults. Every setting is documented in [the example file](addons/stereo_wall_display/wall_kit/STEREO_CONFIG_GODOT.example.cfg). Coordinates are in meters: origin on the floor under the sweet spot, +X right, +Y up, wall at -Z.
+**Machine config.** `STEREO_CONFIG_GODOT.cfg` always lives in `C:\StereoWallGodot\` on Windows (`~/StereoWallGodot/` on Mac/Linux). The app never writes to it, and the editor preview uses it too, so copy the wall PC's file to each developer's computer. Any key the file doesn't set (or every key, when there is no file) comes from the rig's **Wall** settings in the Inspector, which default to LAVA lab's wall. Every setting is documented in [the example file](addons/stereo_wall_display/wall_kit/STEREO_CONFIG_GODOT.example.cfg). Coordinates are in meters: origin on the floor under the sweet spot, +X right, +Y up, wall at -Z.
 
 **Publishing:** see [PUBLISHING.md](PUBLISHING.md). **License:** MIT, see [LICENSE](LICENSE).

@@ -3,7 +3,8 @@ class_name StereoWallConfig
 extends RefCounted
 ## Machine settings for the physical wall, read from STEREO_CONFIG_GODOT.cfg in
 ## C:/StereoWallGodot/ on Windows (~/StereoWallGodot/ elsewhere). The file is
-## hand-edited and never written by the rig; missing keys use the defaults below.
+## hand-edited and never written by the rig; missing keys use the defaults passed in
+## (the rig's Wall settings in the Inspector) or the values below.
 
 const FILE_NAME := "STEREO_CONFIG_GODOT.cfg"
 
@@ -24,21 +25,23 @@ var resolution_height := 1620
 var window_position := Vector2i.ZERO
 var swap_eyes := false
 var stereo_enabled := true
-# [wall] (meters; room origin is the floor under the sweet spot, wall faces +Z)
-var wall_width := 6.047
-var wall_height := 2.042
-var wall_center_height := 1.75
-var wall_distance := 2.282
-var wall_offset_x := 0.0
+# [wall] (meters; room origin is the floor under the sweet spot, wall faces +Z). Defaults come from the rig.
+var wall_width: float
+var wall_height: float
+var wall_center_height: float
+var wall_distance: float
+var wall_offset_x: float
 # [render]
 var eye_separation := 0.063
 var near_clip := 0.05
 var far_clip := 5000.0
 # [calibration]
-var sweet_spot := Vector3(0, 1.64, 0)  ## Ideal eye position in the room
+var sweet_spot: Vector3  ## Ideal eye position in the room
 
 
-func _init() -> void:
+func _init(defaults := {}) -> void:
+	for key in defaults:
+		set(key, defaults[key])
 	var file := ConfigFile.new()
 	loaded = file.load(path) == OK
 	if loaded:  # Otherwise keep the defaults

@@ -35,7 +35,30 @@ const HELP_FLY := ["E / RB   Up", "Q / LB   Down"]
 @export var controller_look_speed := 0.05  ## Right stick
 @export var controller_deadzone := 0.15
 
+@export_group("Wall")
+## Width of the wall picture, in meters.  See the note at the top of this group.
+@export var wall_width := 6.047:
+	set(value): wall_width = value; _place_wall()
+## Height of the wall picture, in meters.  See the note at the top of this group.
+@export var wall_height := 2.042:
+	set(value): wall_height = value; _place_wall()
+## Floor to the middle of the wall picture, in meters.  See the note at the top of this group.
+@export var wall_center_height := 1.75:
+	set(value): wall_center_height = value; _place_wall()
+## Sweet spot (where the viewer stands) to the wall, in meters.  See the note at the top of this group.
+@export var wall_distance := 2.282:
+	set(value): wall_distance = value; _place_wall()
+## Wall center left (-) or right (+) of the sweet spot, in meters.  See the note at the top of this group.
+@export var wall_offset_x := 0.0:
+	set(value): wall_offset_x = value; _place_wall()
+## The viewer's eye position in the room, in meters (y = eye height).  See the note at the top of this group.
+@export var sweet_spot := Vector3(0, 1.64, 0):
+	set(value): sweet_spot = value; _place_wall()
+@export_group("")
+
 const MOVEMENT_SETTINGS := ["move_speed", "jump_velocity", "look_sensitivity", "controller_look_speed", "controller_deadzone"]
+## Inspector fallbacks for these machine config keys. The defaults are LAVA lab's wall.
+const WALL_SETTINGS := ["wall_width", "wall_height", "wall_center_height", "wall_distance", "wall_offset_x", "sweet_spot"]
 
 var cfg: StereoWallConfig
 
@@ -59,11 +82,7 @@ var _displays: Array[TextureRect] = []  # [left, right]
 
 
 func _ready() -> void:
-	cfg = StereoWallConfig.new()
-	# The room pivots around the sweet spot, so looking up/down rotates around the eyes.
-	_room.position = cfg.sweet_spot
-	_wall.position = Vector3(cfg.wall_offset_x, cfg.wall_center_height, -cfg.wall_distance) - cfg.sweet_spot
-	_wall_gizmo.scale = Vector3(cfg.wall_width, cfg.wall_height, 1)
+	_place_wall()
 	_update_wall_gizmo()
 	$Room/Head/HeadGizmo.visible = Engine.is_editor_hint()
 	if Engine.is_editor_hint():
@@ -138,6 +157,20 @@ func _apply_mode() -> void:
 		canvas.add_child(display)
 		_displays.append(display)
 	_layout_displays()
+
+
+## Loads the machine config (the Wall settings fill in any keys it doesn't set) and places the wall.
+func _place_wall() -> void:
+	if not is_node_ready():
+		return
+	var defaults := {}
+	for key in WALL_SETTINGS:
+		defaults[key] = get(key)
+	cfg = StereoWallConfig.new(defaults)
+	# The room pivots around the sweet spot, so looking up/down rotates around the eyes.
+	_room.position = cfg.sweet_spot
+	_wall.position = Vector3(cfg.wall_offset_x, cfg.wall_center_height, -cfg.wall_distance) - cfg.sweet_spot
+	_wall_gizmo.scale = Vector3(cfg.wall_width, cfg.wall_height, 1)
 
 
 ## Hides movement settings in the Inspector when they don't apply (values are kept).
@@ -304,7 +337,7 @@ func _update_hud() -> void:
 	if mode == Mode.EDIT:
 		lines.append("EDIT MODE  -  F2 for stereo, F1 for help")
 	if mode == Mode.STEREO and not cfg.loaded:
-		lines.append("No machine config (%s) - using defaults" % cfg.path)
+		lines.append("No machine config (%s) - using the rig's Wall settings" % cfg.path)
 	if _message != "":
 		lines.append(_message)
 	if _show_help:
