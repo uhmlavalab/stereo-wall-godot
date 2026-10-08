@@ -1,64 +1,35 @@
 # Stereo Wall Display
 
-A Godot 4.7+ addon that turns a large 3D display wall into a single-wall "CAVE": side-by-side stereo with off-axis projection for a viewer standing at a fixed spot in front of the display wall.
+A Godot 4.7+ addon for making apps that run on a large 3D display wall, built at the UH LAVA lab. It renders side-by-side stereo with off-axis projection, so 3D content appears correctly to a viewer standing in front of the display wall.
 
 ![Godot 4.7+](https://img.shields.io/badge/Godot-4.7+-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
 ![Editor View](screenshots/editor.jpeg)
 
-- **In Godot (Play):** Edit mode. A normal window with one camera; no stereo or config needed.
-- **Exported build:** Stereo mode. Reads the display wall's machine config.
+## Download
 
-The display wall appears as a blue see-through rectangle. Objects in front of it pop out of the screen; objects behind it sit inside. Keep important content near or behind the display wall.
+Get the latest zip from the [Releases page](https://github.com/uhmlavalab/stereo-wall-godot/releases/latest). To add it to a Godot project:
 
-## Quick start
+- **In Godot:** open the **AssetLib** tab, click **Import…**, pick the zip, and click **Install**.
+- **Or by hand:** unzip it and copy the `addons/stereo_wall_display` folder into your project's `addons/` folder.
 
-1. Copy `addons/stereo_wall_display/` into your project (or install it from the Asset Library).
-2. Drag `addons/stereo_wall_display/stereo_wall_rig.tscn` into your scene where the viewer starts. The rig is the player; the display wall moves with it.
-3. Set the rig's `controls`:
-   - **Walk** (default): FPS with gravity, collisions and jump.
-   - **Fly**: free movement through walls.
-   - **None**: move the rig yourself (code, AnimationPlayer, or parent it to something).
-4. Press Play.
+To update, delete `addons/stereo_wall_display/` from your project and install the new zip.
 
-Nodes under `Room/Head` sit at the viewer's eyes; nodes under `Room` follow the rig. See `addons/stereo_wall_display/examples/example_scene.tscn`.
+## Which guide do I need?
 
-## Keys
+| You are… | Read |
+|----------|------|
+| Making an app for the display wall | [Plugin usage](addons/stereo_wall_display/README.md) |
+| Setting up or maintaining the display wall PC | [Display wall setup](addons/stereo_wall_display/display_wall_setup/README.md) |
+| Publishing a new version of this addon | [Releasing](RELEASING.md) |
 
-On a Mac laptop, hold **Fn** for F-keys.
+App developers don't need to set anything up on the display wall PC. That is done once by the display wall maintainer.
 
-**Hotkeys** are always on, in every mode. Don't use these keys for anything else in your app.
+## Head tracking
 
-| Key | Action |
-|-----|--------|
-| F1 | Help |
-| F2 | Edit ⇄ Stereo (preview display wall output) |
-| F3 | 3D on/off |
-| F4 | Swap eyes |
-| Esc | Quit |
+Webcam head tracking is in progress on the `feature-headtracking` branch and is not part of the releases yet.
 
-**Movement controls** turn off when `controls` is None, which frees these keys and buttons for your app.
+## License
 
-| Key | Action |
-|-----|--------|
-| WASD / Left stick | Move (Shift / stick click = faster) |
-| Mouse / Right stick | Look |
-| Space / A | Jump (Walk) |
-| E / RB, Q / LB | Up, down (Fly) |
-| R | Reset to start position |
-
-## Build for the display wall
-
-1. **Project → Export** a **Windows Desktop** build. Turn on **Embed PCK** to get a single `.exe`.
-2. Put the `.exe` in the display wall PC's builds folder and double-click it. Exported builds start in stereo.
-
-The display wall PC needs a one-time setup: its measurements go in `C:\StereoWallGodot\STEREO_CONFIG_GODOT.cfg`, which every game on that PC shares. See [`wall_kit/README.md`](addons/stereo_wall_display/wall_kit/README.md).
-
-`--edit` and `--stereo` on the command line override the automatic mode.
-
-## Reference
-
-**Machine config.** `STEREO_CONFIG_GODOT.cfg` always lives in `C:\StereoWallGodot\` on Windows (`~/StereoWallGodot/` on Mac/Linux). The app never writes to it. The display wall's size and position also appear in the rig's **Display Wall** settings in the Inspector (default: LAVA lab's display wall). Run from Godot, the Inspector values are used. In exported builds the config file wins, and the Inspector values only fill in keys it doesn't set. Every setting is documented in [the example file](addons/stereo_wall_display/wall_kit/STEREO_CONFIG_GODOT.example.cfg). Coordinates are in meters: origin on the floor where the viewer stands, +X right, +Y up, display wall at -Z.
-
-**Publishing:** see [PUBLISHING.md](PUBLISHING.md). **License:** MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
