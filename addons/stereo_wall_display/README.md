@@ -8,8 +8,8 @@ Full docs: https://github.com/uhmlavalab/stereo-wall-godot
 
 1. Drag `stereo_wall_rig.tscn` into your scene where the viewer starts.
 2. Set `controls` on the rig: **Walk**, **Fly** or **None** (move it yourself).
-3. Press Play. You get a normal window, and the blue rectangle marks the wall.
-4. For the wall, export a Windows `.exe` and put it in the wall PC's builds folder. The wall's settings live in `C:\StereoWallGodot\STEREO_CONFIG_GODOT.cfg`; `wall_kit/README.md` covers the one-time setup.
+3. Press Play. You get a normal window, and the blue rectangle marks the display wall.
+4. For the display wall, export a Windows `.exe` and put it in the display wall PC's builds folder. The display wall's settings live in `C:\StereoWallGodot\STEREO_CONFIG_GODOT.cfg`; `wall_kit/README.md` covers the one-time setup.
 
 Examples are in `examples/`.
 

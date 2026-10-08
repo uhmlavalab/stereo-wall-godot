@@ -4,7 +4,7 @@ The new store is at [store.godotengine.org](https://store.godotengine.org). The 
 
 ## The repo is already set up for it
 
-- Everything users need is in `addons/stereo_wall_display/`, including `README.md`, `LICENSE`, `plugin.cfg`, the icon, `examples/` and `wall_kit/` (wall PC setup).
+- Everything users need is in `addons/stereo_wall_display/`, including `README.md`, `LICENSE`, `plugin.cfg`, the icon, `examples/` and `wall_kit/` (display wall PC setup).
 - `LICENSE` is at the repo root (required).
 - `.gitignore` keeps `.godot/` and `*.import` out of the repo (required).
 - `.gitattributes` uses `export-ignore`, so `git archive` only packs `addons/`.

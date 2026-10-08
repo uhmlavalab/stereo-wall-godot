@@ -20,7 +20,7 @@ const HELP_WALK := ["Space / A   Jump"]
 const HELP_FLY := ["E / RB   Up", "Q / LB   Down"]
 
 @export var mode := Mode.AUTO  ## Auto = Edit when run from Godot, Stereo in exported builds. Override with --edit / --stereo.
-@export var show_wall := true:  ## Show the wall rectangle in the editor and in Edit mode
+@export var show_wall := true:  ## Show the display wall rectangle in the editor and in Edit mode
 	set(value):
 		show_wall = value
 		if is_node_ready():
@@ -36,20 +36,20 @@ const HELP_FLY := ["E / RB   Up", "Q / LB   Down"]
 @export var controller_deadzone := 0.15
 
 @export_group("Display Wall")
-## Width of the wall picture, in meters.  Hover the orange note above for where these values come from.
+## Width of the display wall picture, in meters.  Hover the orange note above for where these values come from.
 @export var wall_width := 6.047:
 	set(value): wall_width = value; _place_wall()
-## Height of the wall picture, in meters.  Hover the orange note above for where these values come from.
+## Height of the display wall picture, in meters.  Hover the orange note above for where these values come from.
 @export var wall_height := 2.042:
 	set(value): wall_height = value; _place_wall()
-## Floor to the middle of the wall picture, in meters.  Hover the orange note above for where these values come from.
+## Floor to the middle of the display wall picture, in meters.  Hover the orange note above for where these values come from.
 @export var wall_center_height := 1.75:
 	set(value): wall_center_height = value; _place_wall()
-## Where the viewer stands to the wall, in meters.  Hover the orange note above for where these values come from.
+## Where the viewer stands to the display wall, in meters.  Hover the orange note above for where these values come from.
 @export var wall_distance := 2.282:
 	set(value): wall_distance = value; _place_wall()
-## How far the wall's center is to the right (+) or left (-) of where the viewer stands, in meters.
-## 0 = the viewer stands centered in front of the wall.  Hover the orange note above for where these values come from.
+## How far the display wall's center is to the right (+) or left (-) of where the viewer stands, in meters.
+## 0 = the viewer stands centered in front of the display wall.  Hover the orange note above for where these values come from.
 @export var wall_offset_x := 0.0:
 	set(value): wall_offset_x = value; _place_wall()
 ## Floor to the viewer's eyes, in meters.  Hover the orange note above for where these values come from.
