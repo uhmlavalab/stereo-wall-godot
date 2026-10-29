@@ -42,8 +42,6 @@ When you run from Godot, these values are used. The exported app on the display 
 
 ## Keys
 
-On a Mac laptop, hold **Fn** for F-keys.
-
 These work in every app. Don't use them for anything else.
 
 | Key | Action |
