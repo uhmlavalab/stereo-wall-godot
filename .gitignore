@@ -37,3 +37,8 @@ export/
 build/
 exports/
 
+
+# Python
+.venv/
+__pycache__/
+*.task

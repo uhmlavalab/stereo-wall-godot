@@ -5,3 +5,5 @@
 /**        export-ignore
 /addons    !export-ignore
 /addons/** !export-ignore
+# Windows batch files need CRLF
+*.bat text eol=crlf

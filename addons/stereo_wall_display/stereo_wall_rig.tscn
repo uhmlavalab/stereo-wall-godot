@@ -1,0 +1,65 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://addons/stereo_wall_display/stereo_wall_rig.gd" id="1_rig"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.3
+height = 1.8
+
+[sub_resource type="QuadMesh" id="QuadMesh_wall"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(0.2, 0.6, 1, 0.25)
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.1
+height = 0.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_head"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.9, 0.3, 1)
+
+[node name="StereoWallRig" type="CharacterBody3D"]
+script = ExtResource("1_rig")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Room" type="Node3D" parent="."]
+
+[node name="Wall" type="Node3D" parent="Room"]
+
+[node name="WallGizmo" type="MeshInstance3D" parent="Room/Wall"]
+mesh = SubResource("QuadMesh_wall")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="Head" type="Node3D" parent="Room"]
+
+[node name="HeadGizmo" type="MeshInstance3D" parent="Room/Head"]
+mesh = SubResource("SphereMesh_head")
+material_override = SubResource("StandardMaterial3D_head")
+
+[node name="EditCamera" type="Camera3D" parent="Room/Head"]
+fov = 75.0
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 101
+
+[node name="Label" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 16.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 24
+
+[node name="LabelRightEye" type="Label" parent="HUD"]
+visible = false
+offset_left = 16.0
+offset_top = 16.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 24
