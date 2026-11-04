@@ -10,7 +10,7 @@ const FILE_NAME := "STEREO_CONFIG_GODOT.cfg"
 
 ## Which keys live in which [section] of the file.
 const SECTIONS := {
-	"display": ["resolution_width", "resolution_height", "window_position", "swap_eyes", "stereo_enabled"],
+	"display": ["window_width", "window_height", "window_position", "swap_eyes", "stereo_enabled"],
 	"wall": ["wall_width", "wall_height", "wall_center_height", "wall_distance", "wall_offset_x"],
 	"render": ["eye_separation", "near_clip", "far_clip"],
 	"viewer": ["eye_height"],
@@ -20,8 +20,8 @@ var path := folder().path_join(FILE_NAME)
 var loaded := false  ## False = file missing, using defaults
 
 # [display]
-var resolution_width := 4800  ## Pixels per eye
-var resolution_height := 1620
+var window_width := 9600  ## Whole display, both eyes side by side
+var window_height := 1620
 var window_position := Vector2i.ZERO
 var swap_eyes := false
 var stereo_enabled := true
@@ -48,6 +48,9 @@ func _init(defaults := {}) -> void:
 		for section in SECTIONS:
 			for key in SECTIONS[section]:
 				set(key, file.get_value(section, key, get(key)))
+		if not file.has_section_key("display", "window_width") and file.has_section_key("display", "resolution_width"):
+			window_width = file.get_value("display", "resolution_width") * 2  # Older configs: per eye
+			window_height = file.get_value("display", "resolution_height", window_height)
 		if not file.has_section_key("viewer", "eye_height") and file.has_section_key("calibration", "sweet_spot"):
 			eye_height = file.get_value("calibration", "sweet_spot").y  # Older configs
 
