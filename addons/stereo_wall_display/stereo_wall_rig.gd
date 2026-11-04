@@ -132,18 +132,11 @@ func _apply_mode() -> void:
 	for label in [_hud, _hud_right]:
 		label.add_theme_font_size_override("font_size", 24 if mode == Mode.EDIT else int(cfg.window_height / 30.0))
 
+	_set_window()
 	if mode == Mode.EDIT:
-		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
-		DisplayServer.window_set_size(Vector2i(
-			ProjectSettings.get_setting("display/window/size/viewport_width"),
-			ProjectSettings.get_setting("display/window/size/viewport_height")))
 		return
 
 	var eye_size := Vector2i(cfg.window_width / 2, cfg.window_height)
-	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
-	DisplayServer.window_set_position(cfg.window_position)
-	_fit_window()
-	_fit_window.call_deferred()  # Again once the window has landed on its screen
 
 	var canvas := CanvasLayer.new()
 	canvas.layer = 100
@@ -201,11 +194,28 @@ func _update_wall_gizmo() -> void:
 	_wall_gizmo.visible = show_wall and (Engine.is_editor_hint() or mode != Mode.STEREO)
 
 
+## Sizes the window for the mode. Skipped when the game runs in the editor's Game tab,
+## where Godot doesn't allow it; stereo then just fills the tab.
+func _set_window() -> void:
+	if Engine.is_embedded_in_editor():
+		return
+	var stereo := mode == Mode.STEREO
+	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, stereo)
+	if stereo:
+		DisplayServer.window_set_position(cfg.window_position)
+		_fit_window()
+		_fit_window.call_deferred()  # Again once the window has landed on its screen
+	else:
+		DisplayServer.window_set_size(Vector2i(
+			ProjectSettings.get_setting("display/window/size/viewport_width"),
+			ProjectSettings.get_setting("display/window/size/viewport_height")))
+
+
 ## Windows can rescale the window for the screen's display scaling (e.g. 150%),
 ## so put back the exact stereo size whenever it changes.
 func _fit_window() -> void:
 	var size := Vector2i(cfg.window_width, cfg.window_height)
-	if mode == Mode.STEREO and DisplayServer.window_get_size() != size:
+	if mode == Mode.STEREO and not Engine.is_embedded_in_editor() and DisplayServer.window_get_size() != size:
 		DisplayServer.window_set_size(size)
 
 
