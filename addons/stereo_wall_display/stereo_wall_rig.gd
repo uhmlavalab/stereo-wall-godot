@@ -79,6 +79,7 @@ var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 
 var _stereo_nodes: Array[Node] = []  # Viewports and canvas, freed when leaving stereo
 var _cameras: Array[Camera3D] = []  # [left, right]
 var _displays: Array[TextureRect] = []  # [left, right]
+var _project_scale_mode: Window.ContentScaleMode  # The project's stretch mode, used in Edit mode
 
 @onready var _room: Node3D = $Room
 @onready var _wall: Node3D = $Room/Wall
@@ -111,6 +112,7 @@ func _ready() -> void:
 	if controls != Controls.NONE:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	get_window().size_changed.connect(_fit_window)
+	_project_scale_mode = get_window().content_scale_mode
 	_apply_mode()
 
 
@@ -125,6 +127,9 @@ func _apply_mode() -> void:
 	_cameras.clear()
 	_displays.clear()
 	_edit_camera.current = mode == Mode.EDIT
+	# Stereo is laid out in real pixels: on Windows, stretch (canvas_items in new projects)
+	# shrank the picture into a corner of the screen.
+	get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED if mode == Mode.STEREO else _project_scale_mode
 	get_viewport().disable_3d = mode == Mode.STEREO  # Only the eye viewports render in stereo
 	_update_wall_gizmo()
 	DisplayServer.window_set_title("Stereo Wall - " + ("EDIT MODE" if mode == Mode.EDIT else "STEREO"))
@@ -200,6 +205,7 @@ func _set_window() -> void:
 	if Engine.is_embedded_in_editor():
 		return
 	var stereo := mode == Mode.STEREO
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, stereo)
 	if stereo:
 		DisplayServer.window_set_position(cfg.window_position)
@@ -214,9 +220,18 @@ func _set_window() -> void:
 ## Windows can rescale the window for the screen's display scaling (e.g. 150%),
 ## so put back the exact stereo size whenever it changes.
 func _fit_window() -> void:
-	var size := Vector2i(cfg.window_width, cfg.window_height)
-	if mode == Mode.STEREO and not Engine.is_embedded_in_editor() and DisplayServer.window_get_size() != size:
-		DisplayServer.window_set_size(size)
+	if mode != Mode.STEREO or Engine.is_embedded_in_editor():
+		return
+	var rect := Rect2i(cfg.window_position, Vector2i(cfg.window_width, cfg.window_height))
+	var screen := DisplayServer.get_screen_from_rect(rect)
+	if rect == Rect2i(DisplayServer.screen_get_position(screen), DisplayServer.screen_get_size(screen)):
+		# Exactly one screen: Windows would turn a borderless window into exclusive
+		# fullscreen (picture in a corner), so use Godot's fullscreen instead.
+		if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_FULLSCREEN:
+			DisplayServer.window_set_current_screen(screen)
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	elif DisplayServer.window_get_size() != rect.size:
+		DisplayServer.window_set_size(rect.size)
 
 
 ## Each eye fills half the window, left eye on the left unless swapped,
