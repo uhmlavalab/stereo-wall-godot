@@ -16,7 +16,7 @@ Put a tape mark on the floor where the viewer should stand, centered in front of
 
    | Setting | What to measure or enter |
    |---------|--------------------------|
-   | `resolution_width`, `resolution_height` | Pixels per eye (the app window is twice as wide) |
+   | `window_width`, `window_height` | The whole display's resolution, e.g. `3840`, `2160` for a 4K 3D TV. Each eye gets half the width. |
    | `window_position` | Where the app window starts, if the display wall isn't the main screen |
    | `wall_width`, `wall_height` | Size of the display wall picture, in meters |
    | `wall_center_height` | Floor to the middle of the display wall |

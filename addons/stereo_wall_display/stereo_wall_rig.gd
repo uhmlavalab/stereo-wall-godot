@@ -110,6 +110,7 @@ func _ready() -> void:
 		mode = Mode.EDIT if OS.has_feature("editor") else Mode.STEREO
 	if controls != Controls.NONE:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	get_window().size_changed.connect(_fit_window)
 	_apply_mode()
 
 
@@ -124,11 +125,12 @@ func _apply_mode() -> void:
 	_cameras.clear()
 	_displays.clear()
 	_edit_camera.current = mode == Mode.EDIT
+	get_viewport().disable_3d = mode == Mode.STEREO  # Only the eye viewports render in stereo
 	_update_wall_gizmo()
 	DisplayServer.window_set_title("Stereo Wall - " + ("EDIT MODE" if mode == Mode.EDIT else "STEREO"))
 	# Big enough text to read on the wall.
 	for label in [_hud, _hud_right]:
-		label.add_theme_font_size_override("font_size", 24 if mode == Mode.EDIT else int(cfg.resolution_height / 30.0))
+		label.add_theme_font_size_override("font_size", 24 if mode == Mode.EDIT else int(cfg.window_height / 30.0))
 
 	if mode == Mode.EDIT:
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
@@ -137,10 +139,11 @@ func _apply_mode() -> void:
 			ProjectSettings.get_setting("display/window/size/viewport_height")))
 		return
 
-	var eye_size := Vector2i(cfg.resolution_width, cfg.resolution_height)
+	var eye_size := Vector2i(cfg.window_width / 2, cfg.window_height)
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
 	DisplayServer.window_set_position(cfg.window_position)
-	DisplayServer.window_set_size(Vector2i(eye_size.x * 2, eye_size.y))
+	_fit_window()
+	_fit_window.call_deferred()  # Again once the window has landed on its screen
 
 	var canvas := CanvasLayer.new()
 	canvas.layer = 100
@@ -160,7 +163,8 @@ func _apply_mode() -> void:
 		_cameras.append(camera)
 
 		var display := TextureRect.new()
-		display.size = eye_size
+		display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		display.anchor_bottom = 1.0
 		display.texture = viewport.get_texture()
 		canvas.add_child(display)
 		_displays.append(display)
@@ -197,10 +201,21 @@ func _update_wall_gizmo() -> void:
 	_wall_gizmo.visible = show_wall and (Engine.is_editor_hint() or mode != Mode.STEREO)
 
 
-## Left eye on the left half of the window, unless swapped.
+## Windows can rescale the window for the screen's display scaling (e.g. 150%),
+## so put back the exact stereo size whenever it changes.
+func _fit_window() -> void:
+	var size := Vector2i(cfg.window_width, cfg.window_height)
+	if mode == Mode.STEREO and DisplayServer.window_get_size() != size:
+		DisplayServer.window_set_size(size)
+
+
+## Each eye fills half the window, left eye on the left unless swapped,
+## so the picture still fits if the window isn't the exact size.
 func _layout_displays() -> void:
 	for i in _displays.size():
-		_displays[i].position.x = cfg.resolution_width * (i if not _swap_eyes else 1 - i)
+		var left := 0.5 * (i if not _swap_eyes else 1 - i)
+		_displays[i].anchor_left = left
+		_displays[i].anchor_right = left + 0.5
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #                              INPUT
@@ -359,5 +374,5 @@ func _update_hud() -> void:
 	_hud.text = "\n".join(lines)
 	# In stereo, repeat the text on the right-eye half so both eyes see it.
 	_hud_right.visible = mode == Mode.STEREO
-	_hud_right.position.x = cfg.resolution_width + _hud.position.x
+	_hud_right.position.x = get_viewport().get_visible_rect().size.x / 2.0 + _hud.position.x
 	_hud_right.text = _hud.text

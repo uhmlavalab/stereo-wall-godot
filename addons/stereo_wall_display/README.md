@@ -64,7 +64,7 @@ Movement keys turn off when **Controls** is None, which frees them for your app.
 
 ## Building for the display wall
 
-1. **Project → Export** a **Windows Desktop** build. Turn on **Embed PCK** so it's a single `.exe`.
+1. **Project → Export**, add a **Windows Desktop** preset. Turn on **Embed PCK** so the build is a single `.exe`. Enter a file name in **Export Path**, then click **Export Project**.
 2. Copy the `.exe` into the display wall PC's apps folder (ask the display wall maintainer where it is).
 3. Double-click it on the display wall PC. It starts in stereo, sized for the display wall.
 
