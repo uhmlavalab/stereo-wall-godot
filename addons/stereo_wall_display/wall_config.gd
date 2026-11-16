@@ -10,7 +10,7 @@ const FILE_NAME := "STEREO_CONFIG_GODOT.cfg"
 
 ## Which keys live in which [section] of the file.
 const SECTIONS := {
-	"display": ["window_width", "window_height", "window_position", "swap_eyes", "stereo_enabled"],
+	"display": ["window_width", "window_height", "window_position", "swap_eyes", "stereo_enabled", "samsung_3d_display"],
 	"wall": ["wall_width", "wall_height", "wall_center_height", "wall_distance", "wall_offset_x"],
 	"render": ["eye_separation", "near_clip", "far_clip"],
 	"viewer": ["eye_height"],
@@ -25,6 +25,9 @@ var window_height := 1620
 var window_position := Vector2i.ZERO
 var swap_eyes := false
 var stereo_enabled := true
+## True on a Samsung Odyssey 3D monitor: the app fills the screen and the window_* keys are
+## ignored. False = display wall.
+var samsung_3d_display := false
 # [wall] (meters; room origin is the floor where the viewer stands, wall faces +Z). Defaults come from the rig.
 var wall_width: float
 var wall_height: float
