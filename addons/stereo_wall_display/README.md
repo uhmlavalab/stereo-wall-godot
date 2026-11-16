@@ -2,7 +2,7 @@
 
 For people making Godot apps for the stereo display wall. Godot 4.7+.
 
-You don't need to set up the display wall itself. The display wall PC already knows its own size and settings.
+You don't need to set up the display wall itself. The display wall PC already knows its own size and settings. The same build also runs on a Samsung Odyssey 3D monitor that has been set up for it.
 
 ## Install
 
@@ -29,6 +29,8 @@ See `examples/example_scene.tscn` for a working scene.
 
 - **Pressing Play in Godot** gives **Edit mode**: a normal window with one camera. The display wall is shown as a blue see-through rectangle.
 - **Your exported app** starts in **Stereo mode**: side-by-side left/right images for the display wall. Press F2 in either to switch.
+
+Stereo mode on your own computer is only a rough preview: the window is sized for the display wall, so it may not fit your screen.
 
 Objects in front of the blue rectangle pop out of the display wall; objects behind it appear inside it. Keep important content near or behind it.
 

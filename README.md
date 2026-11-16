@@ -1,6 +1,6 @@
 # Stereo Wall Display
 
-A Godot 4.7+ addon for making apps that run on a large 3D display wall, built at the UH LAVA lab. It renders side-by-side stereo with off-axis projection, so 3D content appears correctly to a viewer standing in front of the display wall.
+A Godot 4.7+ addon for making apps that run on a large 3D display wall, built at the UH LAVA lab. It renders side-by-side stereo with off-axis projection, so 3D content appears correctly to a viewer standing in front of the display wall. The same apps also run on a Samsung Odyssey 3D monitor.
 
 ![Godot 4.7+](https://img.shields.io/badge/Godot-4.7+-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)

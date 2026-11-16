@@ -7,6 +7,10 @@ extends CharacterBody3D
 ## shown as a blue see-through rectangle. Stereo mode (default in exported builds):
 ## side-by-side output for the wall, using the machine config. The Room node holds
 ## the wall and the head; the head sits at eye height above the rig, giving off-axis projection.
+##
+## Stereo has two window paths, picked by samsung_3d_display in the machine config: the display
+## wall (a borderless window at the config's size and place) and the Samsung Odyssey 3D monitor
+## (fullscreen). Keep them separate: each was tuned on its own hardware.
 
 enum Mode { AUTO, EDIT, STEREO }
 enum Controls { WALK, FLY, NONE }
@@ -80,6 +84,7 @@ var _stereo_nodes: Array[Node] = []  # Viewports and canvas, freed when leaving 
 var _cameras: Array[Camera3D] = []  # [left, right]
 var _displays: Array[TextureRect] = []  # [left, right]
 var _project_scale_mode: Window.ContentScaleMode  # The project's stretch mode, used in Edit mode
+var _fullscreen := false  # Samsung: stereo has taken the whole screen (or is about to)
 
 @onready var _room: Node3D = $Room
 @onready var _wall: Node3D = $Room/Wall
@@ -111,7 +116,7 @@ func _ready() -> void:
 		mode = Mode.EDIT if OS.has_feature("editor") else Mode.STEREO
 	if controls != Controls.NONE:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	get_window().size_changed.connect(_fit_window)
+	get_window().size_changed.connect(_fit_eyes_to_screen)
 	_project_scale_mode = get_window().content_scale_mode
 	_apply_mode()
 
@@ -127,8 +132,8 @@ func _apply_mode() -> void:
 	_cameras.clear()
 	_displays.clear()
 	_edit_camera.current = mode == Mode.EDIT
-	# Stereo is laid out in real pixels: on Windows, stretch (canvas_items in new projects)
-	# shrank the picture into a corner of the screen.
+	# Stereo is laid out in real pixels, so the project's stretch (canvas_items in new
+	# projects) is off while in stereo.
 	get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED if mode == Mode.STEREO else _project_scale_mode
 	get_viewport().disable_3d = mode == Mode.STEREO  # Only the eye viewports render in stereo
 	_update_wall_gizmo()
@@ -161,12 +166,16 @@ func _apply_mode() -> void:
 		_cameras.append(camera)
 
 		var display := TextureRect.new()
-		display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		display.anchor_bottom = 1.0
+		if _fills_window():
+			display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			display.anchor_bottom = 1.0
+		else:
+			display.size = eye_size
 		display.texture = viewport.get_texture()
 		canvas.add_child(display)
 		_displays.append(display)
 	_layout_displays()
+	_fit_eyes_to_screen()
 
 
 ## Loads the machine config and places the wall. Run from Godot, the Display Wall settings win;
@@ -205,42 +214,68 @@ func _set_window() -> void:
 	if Engine.is_embedded_in_editor():
 		return
 	var stereo := mode == Mode.STEREO
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	if cfg.samsung_3d_display:
+		if stereo:
+			_go_fullscreen()
+			return
+		_fullscreen = false
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)  # Leave fullscreen for Edit mode
+	# Display wall: a borderless window at the machine config's size and place. Edit: a normal window.
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, stereo)
 	if stereo:
 		DisplayServer.window_set_position(cfg.window_position)
-		_fit_window()
-		_fit_window.call_deferred()  # Again once the window has landed on its screen
+		DisplayServer.window_set_size(Vector2i(cfg.window_width, cfg.window_height))
 	else:
 		DisplayServer.window_set_size(Vector2i(
 			ProjectSettings.get_setting("display/window/size/viewport_width"),
 			ProjectSettings.get_setting("display/window/size/viewport_height")))
 
 
-## Windows can rescale the window for the screen's display scaling (e.g. 150%),
-## so put back the exact stereo size whenever it changes.
-func _fit_window() -> void:
-	if mode != Mode.STEREO or Engine.is_embedded_in_editor():
+## Samsung Odyssey 3D: fills the screen. The Samsung shows the picture at the size the window had
+## before it went fullscreen, so the window first grows to almost the screen's size. Exclusive
+## fullscreen is exactly the screen's size (the Samsung gives no 3D for Godot's other fullscreen,
+## which is 2 px taller on Windows).
+func _go_fullscreen() -> void:
+	if _fullscreen:
 		return
-	var rect := Rect2i(cfg.window_position, Vector2i(cfg.window_width, cfg.window_height))
-	var screen := DisplayServer.get_screen_from_rect(rect)
-	if rect == Rect2i(DisplayServer.screen_get_position(screen), DisplayServer.screen_get_size(screen)):
-		# Exactly one screen: Windows would turn a borderless window into exclusive
-		# fullscreen (picture in a corner), so use Godot's fullscreen instead.
-		if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_FULLSCREEN:
-			DisplayServer.window_set_current_screen(screen)
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-	elif DisplayServer.window_get_size() != rect.size:
-		DisplayServer.window_set_size(rect.size)
+	_fullscreen = true
+	var window := get_window()
+	var screen := window.current_screen
+	window.borderless = true
+	window.position = DisplayServer.screen_get_position(screen)
+	window.size = DisplayServer.screen_get_size(screen) - Vector2i(0, 2)
+	await get_tree().create_timer(1.0).timeout
+	if mode == Mode.STEREO and _fullscreen:
+		window.mode = Window.MODE_EXCLUSIVE_FULLSCREEN
 
 
-## Each eye fills half the window, left eye on the left unless swapped,
-## so the picture still fits if the window isn't the exact size.
+## Samsung Odyssey 3D: the screen stretches each half of the picture to full width. So each eye
+## renders in the screen's shape and is squeezed into its half (Godot takes the frustum's width
+## from the image's shape).
+func _fit_eyes_to_screen() -> void:
+	if not cfg.samsung_3d_display:
+		return
+	var height := get_window().size.y
+	for camera in _cameras:
+		(camera.get_viewport() as SubViewport).size = Vector2i(roundi(height * cfg.wall_width / cfg.wall_height), height)
+
+
+## True when the eyes follow the window's size: on the Samsung, and when run from Godot (the
+## window there is the Game tab or as big as the developer's screen allows). Exported builds on
+## the display wall place the eyes in exact pixels from the machine config.
+func _fills_window() -> bool:
+	return cfg.samsung_3d_display or OS.has_feature("editor")
+
+
+## Left eye on the left half, unless swapped.
 func _layout_displays() -> void:
 	for i in _displays.size():
-		var left := 0.5 * (i if not _swap_eyes else 1 - i)
-		_displays[i].anchor_left = left
-		_displays[i].anchor_right = left + 0.5
+		var side := i if not _swap_eyes else 1 - i
+		if _fills_window():
+			_displays[i].anchor_left = 0.5 * side
+			_displays[i].anchor_right = 0.5 * side + 0.5
+		else:
+			_displays[i].position.x = cfg.window_width / 2 * side
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #                              INPUT
@@ -251,6 +286,8 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseMotion and controls != Controls.NONE and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_apply_look(event.relative * look_sensitivity)
+	elif event is InputEventMouseButton and event.pressed and controls != Controls.NONE:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED  # Web builds can only capture after a click
 	elif event is InputEventKey and event.pressed and not event.echo:
 		_hotkey(event.physical_keycode)
 
